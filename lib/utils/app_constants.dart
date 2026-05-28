@@ -50,6 +50,20 @@ class AppConstants {
     qualityHigh,
   ];
 
+  // Languages
+  static const List<String> languages = [
+    'English',
+    'Spanish',
+    'French',
+    'German',
+    'Italian',
+    'Portuguese',
+    'Arabic',
+    'Chinese',
+    'Japanese',
+    'Hindi',
+  ];
+
   // Routes
   static const String splashRoute = '/';
   static const String homeRoute = '/home';
@@ -64,8 +78,12 @@ class AppConstants {
 
   // App version
   static const String appVersion = '1.0.0';
+
+  // URLs
   static const String privacyPolicyUrl =
-      'https://uksolutions.com/docsnap/privacy';
+      'https://uday0117.github.io/docsnap/privacy_policy.html';
+  static const String termsUrl =
+      'https://uday0117.github.io/docsnap/terms_and_conditions.html';
   static const String rateAppUrl =
       'https://play.google.com/store/apps/details?id=com.uksolutions.docsnap';
 }

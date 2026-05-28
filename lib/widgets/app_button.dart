@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../themes/app_theme.dart';
 
 class AppButton extends StatelessWidget {
@@ -38,12 +39,19 @@ class AppButton extends StatelessWidget {
           )
         : Row(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
                 Icon(icon, size: 20),
                 const SizedBox(width: 8),
               ],
-              Text(label),
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
             ],
           );
 
@@ -58,6 +66,11 @@ class AppButton extends StatelessWidget {
             side: BorderSide(color: effectiveColor, width: 1.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              inherit: false,
             ),
           ),
           child: child,
@@ -75,6 +88,11 @@ class AppButton extends StatelessWidget {
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            inherit: false,
           ),
         ),
         child: child,

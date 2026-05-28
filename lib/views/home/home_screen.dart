@@ -1,14 +1,16 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../controllers/home_controller.dart';
 import '../../controllers/settings_controller.dart';
 import '../../models/document_model.dart';
 import '../../themes/app_theme.dart';
 import '../../utils/app_constants.dart';
 import '../../utils/app_helpers.dart';
-import '../../widgets/empty_state.dart';
 import '../../widgets/common_widgets.dart';
+import '../../widgets/empty_state.dart';
 
 class HomeScreen extends GetView<HomeController> {
   const HomeScreen({super.key});
@@ -39,7 +41,7 @@ class HomeScreen extends GetView<HomeController> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: controller.navigateToScanner,
         icon: const Icon(Icons.document_scanner_rounded),
-        label: const Text('Scan'),
+        label: Text('scan'.tr),
         backgroundColor: AppTheme.primaryColor,
         foregroundColor: Colors.white,
       ),
@@ -76,29 +78,15 @@ class HomeScreen extends GetView<HomeController> {
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
-        title: const Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'DocSnap',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1,
-              ),
-            ),
-            Text(
-              'PDF Scanner',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ],
+        titlePadding: const EdgeInsets.only(left: 20, bottom: 16, right: 140),
+        title: const Text(
+          'DocSnap',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1,
+          ),
         ),
         background: Container(
           decoration: const BoxDecoration(
@@ -138,7 +126,7 @@ class HomeScreen extends GetView<HomeController> {
             child: Obx(
               () => _StatCard(
                 icon: Icons.description_rounded,
-                label: 'Documents',
+                label: 'total_documents'.tr,
                 value: '${controller.totalDocuments.value}',
                 color: AppTheme.primaryColor,
               ),
@@ -149,7 +137,7 @@ class HomeScreen extends GetView<HomeController> {
             child: Obx(
               () => _StatCard(
                 icon: Icons.layers_rounded,
-                label: 'Total Pages',
+                label: 'total_pages'.tr,
                 value: '${controller.totalPages.value}',
                 color: AppTheme.accentColor,
               ),
@@ -159,7 +147,7 @@ class HomeScreen extends GetView<HomeController> {
           Expanded(
             child: _StatCard(
               icon: Icons.folder_rounded,
-              label: 'Folders',
+              label: 'folder'.tr,
               value: '${AppConstants.defaultFolders.length - 1}',
               color: AppTheme.warningColor,
             ),
@@ -228,8 +216,8 @@ class HomeScreen extends GetView<HomeController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SectionHeader(
-            title: 'Recent Documents',
-            actionLabel: 'View All',
+            title: 'recent_documents'.tr,
+            actionLabel: 'documents'.tr,
             onAction: controller.navigateToDocuments,
           ),
           const SizedBox(height: 8),
@@ -237,9 +225,9 @@ class HomeScreen extends GetView<HomeController> {
             if (controller.recentDocuments.isEmpty) {
               return EmptyState(
                 icon: Icons.description_outlined,
-                title: 'No documents yet',
-                subtitle: 'Scan or import a document to get started.',
-                actionLabel: 'Scan Now',
+                title: 'no_documents'.tr,
+                subtitle: 'start_scanning'.tr,
+                actionLabel: 'scan'.tr,
                 onAction: controller.navigateToScanner,
               );
             }

@@ -13,6 +13,7 @@ import 'services/permission_service.dart';
 import 'services/share_service.dart';
 import 'services/storage_service.dart';
 import 'themes/app_theme.dart';
+import 'translations/app_translations.dart';
 import 'utils/app_constants.dart';
 
 Future<void> main() async {
@@ -61,12 +62,17 @@ class DocSnapApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsCtrl = Get.find<SettingsController>();
+    
     return GetMaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.light,
+      translations: AppTranslations(),
+      locale: settingsCtrl.getLocale(),
+      fallbackLocale: const Locale('en', 'US'),
       initialBinding: InitialBinding(),
       initialRoute: AppConstants.splashRoute,
       getPages: AppRoutes.pages,

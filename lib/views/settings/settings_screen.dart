@@ -13,85 +13,81 @@ class SettingsScreen extends GetView<SettingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Settings'),
+      appBar: GradientAppBar(title: 'settings'.tr),
       body: Obx(
         () => ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _buildSectionTitle(context, 'Appearance'),
+            _buildSectionTitle(context, 'language'.tr),
             _buildSettingsCard([
-              _buildSwitchTile(
-                icon: Icons.dark_mode_rounded,
-                iconColor: const Color(0xFF5C6BC0),
-                title: 'Dark Mode',
-                subtitle: 'Switch between light and dark theme',
-                value: controller.settings.value.darkMode,
-                onChanged: controller.toggleDarkMode,
+              ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withAlpha(26),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.language_rounded,
+                      color: Colors.blue, size: 20),
+                ),
+                title: Text('app_language'.tr,
+                    style: const TextStyle(fontWeight: FontWeight.w500)),
+                subtitle: Text(
+                  'choose_language'.tr,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                trailing: DropdownButton<String>(
+                  value: controller.settings.value.language,
+                  underline: const SizedBox.shrink(),
+                  borderRadius: BorderRadius.circular(12),
+                  items: AppConstants.languages
+                      .map(
+                        (lang) => DropdownMenuItem(
+                          value: lang,
+                          child: Text(
+                            lang,
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) controller.setLanguage(v);
+                  },
+                ),
               ),
             ]),
             const SizedBox(height: 16),
-            _buildSectionTitle(context, 'Scanning'),
-            _buildSettingsCard([
-              _buildSwitchTile(
-                icon: Icons.crop_free_rounded,
-                iconColor: AppTheme.primaryColor,
-                title: 'Auto Crop',
-                subtitle: 'Automatically detect and crop document edges',
-                value: controller.settings.value.autoCrop,
-                onChanged: controller.toggleAutoCrop,
-              ),
-              const Divider(height: 1, indent: 56),
-              _buildSwitchTile(
-                icon: Icons.save_rounded,
-                iconColor: AppTheme.successColor,
-                title: 'Auto Save',
-                subtitle: 'Automatically save scanned documents',
-                value: controller.settings.value.autoSave,
-                onChanged: controller.toggleAutoSave,
-              ),
-            ]),
-            const SizedBox(height: 16),
-            _buildSectionTitle(context, 'PDF Generation'),
-            _buildSettingsCard([
-              _buildDropdownTile(
-                icon: Icons.auto_fix_high_rounded,
-                iconColor: Colors.purple,
-                title: 'Default Filter',
-                value: controller.settings.value.defaultFilter,
-                items: AppConstants.filters,
-                onChanged: controller.setDefaultFilter,
-              ),
-              const Divider(height: 1, indent: 56),
-              _buildDropdownTile(
-                icon: Icons.high_quality_rounded,
-                iconColor: Colors.orange,
-                title: 'PDF Quality',
-                value: controller.settings.value.pdfQuality,
-                items: AppConstants.pdfQualities,
-                onChanged: controller.setPdfQuality,
-              ),
-            ]),
-            const SizedBox(height: 16),
-            _buildSectionTitle(context, 'About'),
+            _buildSectionTitle(context, 'about'.tr),
             _buildSettingsCard([
               _buildActionTile(
                 icon: Icons.privacy_tip_outlined,
                 iconColor: Colors.teal,
-                title: 'Privacy Policy',
+                title: 'privacy_policy'.tr,
                 onTap: () => _launchUrl(AppConstants.privacyPolicyUrl),
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildActionTile(
+                icon: Icons.description_outlined,
+                iconColor: Colors.blue,
+                title: 'terms_and_conditions'.tr,
+                onTap: () => _launchUrl(AppConstants.termsUrl),
               ),
               const Divider(height: 1, indent: 56),
               _buildActionTile(
                 icon: Icons.star_rate_rounded,
                 iconColor: Colors.amber,
-                title: 'Rate App',
+                title: 'rate_app'.tr,
                 onTap: () => _launchUrl(AppConstants.rateAppUrl),
               ),
               const Divider(height: 1, indent: 56),
               _buildActionTile(
                 icon: Icons.info_outline_rounded,
                 iconColor: AppTheme.primaryColor,
-                title: 'App Version',
+                title: 'app_version'.tr,
                 trailing: Text(
                   AppConstants.appVersion,
                   style: const TextStyle(color: Colors.grey),
@@ -99,12 +95,12 @@ class SettingsScreen extends GetView<SettingsController> {
               ),
             ]),
             const SizedBox(height: 16),
-            _buildSectionTitle(context, 'Danger Zone'),
+            _buildSectionTitle(context, 'danger_zone'.tr),
             _buildSettingsCard([
               _buildActionTile(
                 icon: Icons.delete_forever_rounded,
                 iconColor: Colors.red,
-                title: 'Clear All Data',
+                title: 'clear_all_data'.tr,
                 titleColor: Colors.red,
                 onTap: _confirmClearData,
               ),
@@ -146,80 +142,6 @@ class SettingsScreen extends GetView<SettingsController> {
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(children: children),
-    );
-  }
-
-  Widget _buildSwitchTile({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: iconColor.withAlpha(26),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: iconColor, size: 20),
-      ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-      subtitle: Text(
-        subtitle,
-        style: const TextStyle(fontSize: 12, color: Colors.grey),
-      ),
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
-        activeThumbColor: AppTheme.primaryColor,
-      ),
-    );
-  }
-
-  Widget _buildDropdownTile({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String value,
-    required List<String> items,
-    required ValueChanged<String> onChanged,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: iconColor.withAlpha(26),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: iconColor, size: 20),
-      ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-      trailing: DropdownButton<String>(
-        value: value,
-        underline: const SizedBox.shrink(),
-        borderRadius: BorderRadius.circular(12),
-        items: items
-            .map(
-              (item) => DropdownMenuItem(
-                value: item,
-                child: Text(
-                  item,
-                  style: const TextStyle(fontSize: 13),
-                ),
-              ),
-            )
-            .toList(),
-        onChanged: (v) {
-          if (v != null) onChanged(v);
-        },
-      ),
     );
   }
 

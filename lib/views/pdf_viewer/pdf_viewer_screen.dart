@@ -23,13 +23,13 @@ class PdfViewerScreen extends GetView<PdfViewerController> {
         }
         final file = File(controller.pdfPath.value);
         if (!file.existsSync()) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 56, color: Colors.red),
-                SizedBox(height: 16),
-                Text('PDF file not found.'),
+                const Icon(Icons.error_outline, size: 56, color: Colors.red),
+                const SizedBox(height: 16),
+                Text('error'.tr),
               ],
             ),
           );
@@ -73,7 +73,7 @@ class PdfViewerScreen extends GetView<PdfViewerController> {
         IconButton(
           icon: const Icon(Icons.draw_rounded),
           onPressed: controller.openSignature,
-          tooltip: 'Add Signature',
+          tooltip: 'signature'.tr,
         ),
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
@@ -83,14 +83,14 @@ class PdfViewerScreen extends GetView<PdfViewerController> {
           onSelected: (value) {
             if (value == 'rename') controller.renameDocument();
           },
-          itemBuilder: (_) => const [
+          itemBuilder: (_) => [
             PopupMenuItem(
               value: 'rename',
               child: Row(
                 children: [
-                  Icon(Icons.edit, size: 18),
-                  SizedBox(width: 12),
-                  Text('Rename'),
+                  const Icon(Icons.edit, size: 18),
+                  const SizedBox(width: 12),
+                  Text('rename'.tr),
                 ],
               ),
             ),
@@ -113,7 +113,7 @@ class PdfViewerScreen extends GetView<PdfViewerController> {
                       size: 16, color: AppTheme.primaryColor),
                   const SizedBox(width: 8),
                   Text(
-                    'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+                    '${'page'.tr} ${controller.currentPage.value} ${'of'.tr} ${controller.totalPages.value}',
                     style: TextStyle(
                       color: AppTheme.primaryColor,
                       fontWeight: FontWeight.w600,

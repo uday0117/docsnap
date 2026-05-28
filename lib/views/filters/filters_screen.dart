@@ -20,7 +20,7 @@ class FiltersScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text('Choose Filter'),
+        title: Text('choose_filter'.tr),
         centerTitle: true,
       ),
       body: Column(
@@ -177,7 +177,7 @@ class FiltersScreen extends StatelessWidget {
         children: [
           Expanded(
             child: AppButton(
-              label: 'Cancel',
+              label: 'cancel'.tr,
               onPressed: ctrl.cancel,
               isOutlined: true,
               color: Colors.white,
@@ -186,7 +186,7 @@ class FiltersScreen extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: AppButton(
-              label: 'Apply Filter',
+              label: 'apply_filter'.tr,
               icon: Icons.check_rounded,
               onPressed: ctrl.applyFilter,
             ),

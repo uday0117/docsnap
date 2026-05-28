@@ -138,7 +138,7 @@ class _DrawSignatureTabState extends State<_DrawSignatureTab> {
                 child: OutlinedButton.icon(
                   onPressed: drawController.clear,
                   icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Clear'),
+                  label: Text('clear'.tr),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -153,8 +153,8 @@ class _DrawSignatureTabState extends State<_DrawSignatureTab> {
                   onPressed: () async {
                     if (drawController.isEmpty) {
                       Get.snackbar(
-                        'Empty',
-                        'Please draw a signature first',
+                        'error'.tr,
+                        'draw_signature_first'.tr,
                         snackPosition: SnackPosition.BOTTOM,
                       );
                       return;
@@ -165,7 +165,7 @@ class _DrawSignatureTabState extends State<_DrawSignatureTab> {
                     }
                   },
                   icon: const Icon(Icons.save_rounded),
-                  label: const Text('Save'),
+                  label: Text('save'.tr),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
                     foregroundColor: Colors.white,
@@ -190,7 +190,7 @@ class _DrawSignatureTabState extends State<_DrawSignatureTab> {
       children: [
         Row(
           children: [
-            const Text('Stroke Width:',
+            Text('stroke_width'.tr,
                 style: TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(width: 12),
             Expanded(
@@ -220,7 +220,7 @@ class _DrawSignatureTabState extends State<_DrawSignatureTab> {
         const SizedBox(height: 8),
         Row(
           children: [
-            const Text('Color:', style: TextStyle(fontWeight: FontWeight.w500)),
+            Text('color'.tr, style: const TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(width: 12),
             Expanded(
               child: Obx(
@@ -351,8 +351,8 @@ class _SavedSignaturesTab extends StatelessWidget {
             children: [
               Icon(Icons.draw_outlined, size: 64, color: Colors.grey.shade400),
               const SizedBox(height: 16),
-              const Text(
-                'No saved signatures',
+              Text(
+                'no_signatures'.tr,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -360,8 +360,8 @@ class _SavedSignaturesTab extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Draw a signature in the Draw tab to save it.',
+              Text(
+                'draw_signature_to_save'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey),
               ),

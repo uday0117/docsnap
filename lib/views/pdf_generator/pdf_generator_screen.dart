@@ -16,15 +16,15 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GradientAppBar(
-        title: 'Generate PDF',
+        title: 'generate_pdf'.tr,
         actions: [
           Obx(
             () => TextButton(
               onPressed: controller.isGenerating.value
                   ? null
                   : controller.generateAndSave,
-              child: const Text(
-                'Save PDF',
+              child: Text(
+                'save'.tr,
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -60,7 +60,7 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Document Name',
+          'document_name'.tr,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
@@ -82,7 +82,7 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Save to Folder', style: Theme.of(context).textTheme.titleMedium),
+        Text('folder'.tr, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Obx(
           () => Wrap(
@@ -115,7 +115,7 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('PDF Quality', style: Theme.of(context).textTheme.titleMedium),
+        Text('pdf_quality'.tr, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Obx(
           () => Row(

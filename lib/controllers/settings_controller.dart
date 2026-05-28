@@ -27,36 +27,49 @@ class SettingsController extends GetxController {
     Get.changeThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
   }
 
+  String get language => settings.value.language;
   bool get isDarkMode => settings.value.darkMode;
-  bool get autoCrop => settings.value.autoCrop;
-  bool get autoSave => settings.value.autoSave;
-  String get defaultFilter => settings.value.defaultFilter;
-  String get pdfQuality => settings.value.pdfQuality;
+
+  Locale getLocale() {
+    return _languageToLocale(settings.value.language);
+  }
+
+  Locale _languageToLocale(String language) {
+    switch (language) {
+      case 'Spanish':
+        return const Locale('es', 'ES');
+      case 'French':
+        return const Locale('fr', 'FR');
+      case 'German':
+        return const Locale('de', 'DE');
+      case 'Italian':
+        return const Locale('it', 'IT');
+      case 'Portuguese':
+        return const Locale('pt', 'PT');
+      case 'Arabic':
+        return const Locale('ar', 'SA');
+      case 'Chinese':
+        return const Locale('zh', 'CN');
+      case 'Japanese':
+        return const Locale('ja', 'JP');
+      case 'Hindi':
+        return const Locale('hi', 'IN');
+      case 'English':
+      default:
+        return const Locale('en', 'US');
+    }
+  }
+
+  void setLanguage(String lang) {
+    settings.value = settings.value.copyWith(language: lang);
+    _saveSettings();
+    Get.updateLocale(_languageToLocale(lang));
+  }
 
   void toggleDarkMode(bool value) {
     settings.value = settings.value.copyWith(darkMode: value);
     _saveSettings();
     _applyTheme(value);
-  }
-
-  void toggleAutoCrop(bool value) {
-    settings.value = settings.value.copyWith(autoCrop: value);
-    _saveSettings();
-  }
-
-  void toggleAutoSave(bool value) {
-    settings.value = settings.value.copyWith(autoSave: value);
-    _saveSettings();
-  }
-
-  void setDefaultFilter(String filter) {
-    settings.value = settings.value.copyWith(defaultFilter: filter);
-    _saveSettings();
-  }
-
-  void setPdfQuality(String quality) {
-    settings.value = settings.value.copyWith(pdfQuality: quality);
-    _saveSettings();
   }
 
   void _saveSettings() {

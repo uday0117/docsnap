@@ -29,14 +29,14 @@ class ScannerScreen extends GetView<ScannerController> {
   Widget _buildCameraPreview() {
     return Obx(() {
       if (!controller.isCameraReady.value) {
-        return const Center(
+        return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(color: Colors.white),
-              SizedBox(height: 16),
+              const CircularProgressIndicator(color: Colors.white),
+              const SizedBox(height: 16),
               Text(
-                'Initializing camera...',
+                'loading'.tr,
                 style: TextStyle(color: Colors.white),
               ),
             ],
@@ -285,11 +285,11 @@ class ScannerScreen extends GetView<ScannerController> {
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.info_outline, color: Colors.white, size: 16),
-                SizedBox(width: 8),
+              children: [
+                const Icon(Icons.info_outline, color: Colors.white, size: 16),
+                const SizedBox(width: 8),
                 Text(
-                  'Capture pages to create PDF',
+                  'start_scanning'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 13,

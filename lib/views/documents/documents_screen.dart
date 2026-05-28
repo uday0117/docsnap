@@ -45,8 +45,8 @@ class DocumentsScreen extends GetView<DocumentsController> {
               autofocus: true,
               onChanged: controller.setSearch,
               cursorColor: AppTheme.primaryColor,
-              decoration: const InputDecoration(
-                hintText: 'Search documents...',
+              decoration: InputDecoration(
+                hintText: 'search'.tr,
                 border: InputBorder.none,
                 hintStyle: TextStyle(color: Colors.grey),
                 isDense: true,
@@ -61,7 +61,7 @@ class DocumentsScreen extends GetView<DocumentsController> {
             ),
           );
         }
-        return const Text('My Documents');
+        return Text('my_documents'.tr);
       }),
       elevation: 0,
       actions: [

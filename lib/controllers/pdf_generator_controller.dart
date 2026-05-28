@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 
-import '../controllers/settings_controller.dart';
 import '../models/document_model.dart';
 import '../models/scanned_page.dart';
 import '../repositories/document_repository.dart';
@@ -31,14 +30,8 @@ class PdfGeneratorController extends GetxController {
       }
       documentName.value = (args['name'] as String?) ?? 'Document';
     }
-    // Get default PDF quality from settings if available
-    try {
-      final settingsController = Get.find<SettingsController>();
-      pdfQuality.value = settingsController.pdfQuality;
-    } catch (_) {
-      // If settings controller not found, use default
-      pdfQuality.value = 'High';
-    }
+    // Default PDF quality
+    pdfQuality.value = 'High';
   }
 
   void reorderPages(int oldIndex, int newIndex) {

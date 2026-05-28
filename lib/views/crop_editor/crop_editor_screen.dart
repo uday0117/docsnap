@@ -18,7 +18,7 @@ class CropEditorScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text('Crop & Adjust'),
+        title: Text('crop_adjust'.tr),
         centerTitle: true,
       ),
       body: Column(
@@ -33,9 +33,9 @@ class CropEditorScreen extends StatelessWidget {
   Widget _buildImagePreview(CropEditorController ctrl) {
     return Obx(() {
       if (ctrl.imagePath.value.isEmpty) {
-        return const Center(
+        return Center(
           child:
-              Text('No image selected', style: TextStyle(color: Colors.white)),
+              Text('no_image'.tr, style: const TextStyle(color: Colors.white)),
         );
       }
       if (ctrl.isProcessing.value) {
@@ -75,17 +75,17 @@ class CropEditorScreen extends StatelessWidget {
             children: [
               _ToolButton(
                 icon: Icons.rotate_left_rounded,
-                label: 'Rotate Left',
+                label: 'rotate_left'.tr,
                 onTap: ctrl.rotateLeft,
               ),
               _ToolButton(
                 icon: Icons.rotate_right_rounded,
-                label: 'Rotate Right',
+                label: 'rotate_right'.tr,
                 onTap: ctrl.rotateRight,
               ),
               _ToolButton(
                 icon: Icons.crop_rounded,
-                label: 'Crop',
+                label: 'crop'.tr,
                 onTap: ctrl.openSystemCropper,
               ),
             ],
@@ -96,7 +96,7 @@ class CropEditorScreen extends StatelessWidget {
               Expanded(
                 flex: 2,
                 child: AppButton(
-                  label: 'Cancel',
+                  label: 'cancel'.tr,
                   onPressed: ctrl.cancel,
                   isOutlined: true,
                   color: Colors.white,
@@ -107,7 +107,7 @@ class CropEditorScreen extends StatelessWidget {
                 flex: 3,
                 child: Obx(
                   () => AppButton(
-                    label: 'Skip',
+                    label: 'skip'.tr,
                     icon: Icons.skip_next_rounded,
                     onPressed:
                         ctrl.isProcessing.value ? null : ctrl.skipAndAddPage,
@@ -120,7 +120,7 @@ class CropEditorScreen extends StatelessWidget {
                 flex: 3,
                 child: Obx(
                   () => AppButton(
-                    label: 'Done',
+                    label: 'done'.tr,
                     icon: Icons.check_circle_outline_rounded,
                     onPressed:
                         ctrl.isProcessing.value ? null : ctrl.applyAndAddPage,
@@ -130,9 +130,9 @@ class CropEditorScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Skip to add as-is, Done to apply changes',
-            style: TextStyle(
+          Text(
+            'crop_hint'.tr,
+            style: const TextStyle(
               color: Colors.white60,
               fontSize: 12,
             ),
