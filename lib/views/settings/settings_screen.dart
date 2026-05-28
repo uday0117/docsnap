@@ -67,21 +67,54 @@ class SettingsScreen extends GetView<SettingsController> {
                 icon: Icons.privacy_tip_outlined,
                 iconColor: Colors.teal,
                 title: 'privacy_policy'.tr,
-                onTap: () => _openPrivacyPolicy(),
+                onTap: () async {
+                  final url = Uri.parse(AppConstants.privacyPolicyUrl);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  } else {
+                    Get.snackbar(
+                      'error'.tr,
+                      'could_not_open_privacy_policy'.tr,
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  }
+                },
               ),
               const Divider(height: 1, indent: 56),
               _buildActionTile(
                 icon: Icons.description_outlined,
                 iconColor: Colors.blue,
                 title: 'terms_and_conditions'.tr,
-                onTap: () => _openTermsAndConditions(),
+                onTap: () async {
+                  final url = Uri.parse(AppConstants.termsUrl);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  } else {
+                    Get.snackbar(
+                      'error'.tr,
+                      'could_not_open_terms'.tr,
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  }
+                },
               ),
               const Divider(height: 1, indent: 56),
               _buildActionTile(
                 icon: Icons.star_rate_rounded,
                 iconColor: Colors.amber,
                 title: 'rate_app'.tr,
-                onTap: () => _launchUrl(AppConstants.rateAppUrl),
+                onTap: () async {
+                  final url = Uri.parse(AppConstants.rateAppUrl);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  } else {
+                    Get.snackbar(
+                      'error'.tr,
+                      'could_not_open_store'.tr,
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  }
+                },
               ),
               const Divider(height: 1, indent: 56),
               _buildActionTile(
@@ -177,21 +210,6 @@ class SettingsScreen extends GetView<SettingsController> {
               ? const Icon(Icons.chevron_right, color: Colors.grey)
               : null),
     );
-  }
-
-  Future<void> _launchUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  void _openPrivacyPolicy() {
-    _launchUrl(AppConstants.privacyPolicyUrl);
-  }
-
-  void _openTermsAndConditions() {
-    _launchUrl(AppConstants.termsUrl);
   }
 
   void _confirmClearData() async {
