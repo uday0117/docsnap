@@ -117,9 +117,13 @@ class ScannerController extends GetxController {
     final List<XFile> images = await _picker.pickMultiImage(imageQuality: 95);
     if (images.isEmpty) return;
 
+    // Process images sequentially to avoid navigation stack corruption
     for (final image in images) {
       final savedPath = await _saveImageToTemp(image.path);
-      _openCropEditor(savedPath);
+      final result = await _openCropEditor(savedPath);
+
+      // If user cancels, stop importing remaining images
+      if (result == null) break;
     }
   }
 
@@ -130,8 +134,8 @@ class ScannerController extends GetxController {
     return destPath;
   }
 
-  void _openCropEditor(String imagePath) {
-    Get.toNamed(
+  Future<dynamic> _openCropEditor(String imagePath) async {
+    return await Get.toNamed(
       AppConstants.cropEditorRoute,
       arguments: {'imagePath': imagePath, 'scannerController': this},
     );

@@ -1,16 +1,20 @@
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+
 import '../models/signature_model.dart';
 import '../repositories/signature_repository.dart';
+import '../services/share_service.dart';
 import '../utils/app_helpers.dart';
 
 class SignatureController extends GetxController {
   final SignatureRepository _repository;
+  final _shareService = Get.find<ShareService>();
 
   SignatureController(this._repository);
 
@@ -81,5 +85,20 @@ class SignatureController extends GetxController {
 
   void selectSavedSignature(SignatureModel sig) {
     Get.back(result: sig);
+  }
+
+  Future<void> shareSignature(SignatureModel sig) async {
+    try {
+      if (!File(sig.imagePath).existsSync()) {
+        AppHelpers.showSnackbar('Signature file not found', isError: true);
+        return;
+      }
+      await _shareService.shareFile(
+        sig.imagePath,
+        subject: 'My Signature - ${sig.name}',
+      );
+    } catch (e) {
+      AppHelpers.showSnackbar('Failed to share: $e', isError: true);
+    }
   }
 }

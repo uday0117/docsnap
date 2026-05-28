@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../controllers/documents_controller.dart';
-import '../../models/document_model.dart';
 import '../../themes/app_theme.dart';
 import '../../utils/app_constants.dart';
 import '../../widgets/document_card.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/common_widgets.dart';
 
 class DocumentsScreen extends GetView<DocumentsController> {
   const DocumentsScreen({super.key});
@@ -14,6 +13,7 @@ class DocumentsScreen extends GetView<DocumentsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: _buildAppBar(context),
       body: Column(
         children: [
@@ -32,28 +32,38 @@ class DocumentsScreen extends GetView<DocumentsController> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
+      backgroundColor: AppTheme.primaryColor,
+      foregroundColor: Colors.white,
       title: Obx(() {
         if (controller.isSearching.value) {
-          return TextField(
-            autofocus: true,
-            onChanged: controller.setSearch,
-            decoration: const InputDecoration(
-              hintText: 'Search documents...',
-              border: InputBorder.none,
-              hintStyle: TextStyle(color: Colors.white70),
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: const BoxDecoration(
+              color: Colors.white,
             ),
-            style: const TextStyle(color: Colors.white),
+            child: TextField(
+              autofocus: true,
+              onChanged: controller.setSearch,
+              cursorColor: AppTheme.primaryColor,
+              decoration: const InputDecoration(
+                hintText: 'Search documents...',
+                border: InputBorder.none,
+                hintStyle: TextStyle(color: Colors.grey),
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.none,
+              ),
+            ),
           );
         }
         return const Text('My Documents');
       }),
-      flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppTheme.primaryDark, AppTheme.primaryLight],
-          ),
-        ),
-      ),
+      elevation: 0,
       actions: [
         Obx(
           () => IconButton(

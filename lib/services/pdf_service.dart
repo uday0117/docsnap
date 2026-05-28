@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'dart:typed_data';
+
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:uuid/uuid.dart';
@@ -16,19 +16,8 @@ class PdfService extends GetxService {
     final pdf = pw.Document();
     final pageFormat = PdfPageFormat.a4;
 
-    int jpgQuality;
-    switch (quality) {
-      case 'Low':
-        jpgQuality = 50;
-        break;
-      case 'Medium':
-        jpgQuality = 75;
-        break;
-      case 'High':
-      default:
-        jpgQuality = 95;
-        break;
-    }
+    // Note: jpgQuality setting could be used for image compression in future
+    // Currently PDF package handles image encoding automatically
 
     for (final imagePath in imagesPaths) {
       final bytes = await File(imagePath).readAsBytes();
@@ -48,7 +37,8 @@ class PdfService extends GetxService {
     final dir = await getApplicationDocumentsDirectory();
     final pdfDir = Directory(p.join(dir.path, 'docsnap', 'pdfs'));
     await pdfDir.create(recursive: true);
-    final fileName = '${_sanitizeName(name)}_${const Uuid().v4().substring(0, 8)}.pdf';
+    final fileName =
+        '${_sanitizeName(name)}_${const Uuid().v4().substring(0, 8)}.pdf';
     final filePath = p.join(pdfDir.path, fileName);
 
     final file = File(filePath);
@@ -59,9 +49,10 @@ class PdfService extends GetxService {
   Future<String> mergePdfs(List<String> pdfPaths, String outputName) async {
     final mergedDoc = pw.Document();
 
+    // TODO: Implement proper PDF merging logic
+    // Currently this is a placeholder that creates a new PDF with placeholder pages
     for (final path in pdfPaths) {
-      final bytes = await File(path).readAsBytes();
-      final existingDoc = pw.Document();
+      // Future enhancement: Parse existing PDF and extract pages
       mergedDoc.addPage(
         pw.Page(
           build: (context) => pw.Center(

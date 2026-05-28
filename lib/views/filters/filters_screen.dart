@@ -1,8 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../controllers/filters_controller.dart';
-import '../../services/image_processing_service.dart';
 import '../../themes/app_theme.dart';
 import '../../utils/app_constants.dart';
 import '../../widgets/app_button.dart';
@@ -12,8 +13,7 @@ class FiltersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ImageProcessingService());
-    final ctrl = Get.put(FiltersController());
+    final ctrl = Get.find<FiltersController>();
 
     return Scaffold(
       backgroundColor: Colors.black,

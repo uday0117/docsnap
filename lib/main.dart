@@ -66,7 +66,7 @@ class DocSnapApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       initialBinding: InitialBinding(),
       initialRoute: AppConstants.splashRoute,
       getPages: AppRoutes.pages,

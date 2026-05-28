@@ -1,9 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../controllers/crop_editor_controller.dart';
-import '../../services/image_processing_service.dart';
-import '../../themes/app_theme.dart';
 import '../../widgets/app_button.dart';
 
 class CropEditorScreen extends StatelessWidget {
@@ -11,8 +11,7 @@ class CropEditorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ImageProcessingService());
-    final ctrl = Get.put(CropEditorController());
+    final ctrl = Get.find<CropEditorController>();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -21,19 +20,6 @@ class CropEditorScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         title: const Text('Crop & Adjust'),
         centerTitle: true,
-        actions: [
-          TextButton(
-            onPressed: ctrl.applyAndAddPage,
-            child: const Text(
-              'Add Page',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ),
-            ),
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -108,6 +94,7 @@ class CropEditorScreen extends StatelessWidget {
           Row(
             children: [
               Expanded(
+                flex: 2,
                 child: AppButton(
                   label: 'Cancel',
                   onPressed: ctrl.cancel,
@@ -115,15 +102,40 @@ class CropEditorScreen extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 6),
               Expanded(
-                child: AppButton(
-                  label: 'Add Page',
-                  icon: Icons.add_circle_outline_rounded,
-                  onPressed: ctrl.applyAndAddPage,
+                flex: 3,
+                child: Obx(
+                  () => AppButton(
+                    label: 'Skip',
+                    icon: Icons.skip_next_rounded,
+                    onPressed:
+                        ctrl.isProcessing.value ? null : ctrl.skipAndAddPage,
+                    color: Colors.orange,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                flex: 3,
+                child: Obx(
+                  () => AppButton(
+                    label: 'Done',
+                    icon: Icons.check_circle_outline_rounded,
+                    onPressed:
+                        ctrl.isProcessing.value ? null : ctrl.applyAndAddPage,
+                  ),
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Skip to add as-is, Done to apply changes',
+            style: TextStyle(
+              color: Colors.white60,
+              fontSize: 12,
+            ),
           ),
         ],
       ),

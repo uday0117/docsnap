@@ -88,17 +88,6 @@ class PermissionService extends GetxService {
     return status.isGranted;
   }
 
-  Future<bool> _isAndroid13OrHigher() async {
-    if (!Platform.isAndroid) return false;
-    try {
-      final version =
-          int.tryParse(Platform.operatingSystemVersion.split(' ').last) ?? 0;
-      return version >= 13;
-    } catch (_) {
-      return false;
-    }
-  }
-
   Future<bool> checkCameraPermission() async {
     return await Permission.camera.isGranted;
   }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../models/app_settings.dart';
 import '../services/storage_service.dart';
-import '../utils/app_constants.dart';
 
 class SettingsController extends GetxController {
   final StorageService _storage;

@@ -1,11 +1,9 @@
-import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../controllers/scanner_controller.dart';
 import '../../themes/app_theme.dart';
-import '../../utils/app_constants.dart';
-import '../../widgets/common_widgets.dart';
 
 class ScannerScreen extends GetView<ScannerController> {
   const ScannerScreen({super.key});
@@ -21,6 +19,7 @@ class ScannerScreen extends GetView<ScannerController> {
             _buildTopControls(),
             _buildBottomControls(),
             _buildPageCountBadge(),
+            _buildInstructionBadge(),
           ],
         ),
       ),
@@ -262,6 +261,41 @@ class ScannerScreen extends GetView<ScannerController> {
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildInstructionBadge() {
+    return Obx(() {
+      if (controller.scannedPages.isNotEmpty) return const SizedBox.shrink();
+      return Positioned(
+        top: 80,
+        left: 0,
+        right: 0,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.black.withAlpha(150),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withAlpha(50)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.info_outline, color: Colors.white, size: 16),
+                SizedBox(width: 8),
+                Text(
+                  'Capture pages to create PDF',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

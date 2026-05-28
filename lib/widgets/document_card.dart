@@ -1,9 +1,10 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+
 import '../models/document_model.dart';
-import '../utils/app_helpers.dart';
 import '../themes/app_theme.dart';
+import '../utils/app_helpers.dart';
 
 class DocumentCard extends StatelessWidget {
   final DocumentModel document;
@@ -26,7 +27,6 @@ class DocumentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Card(
       elevation: 2,

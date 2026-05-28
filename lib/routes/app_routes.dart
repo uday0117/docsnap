@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 
+import '../bindings/crop_editor_binding.dart';
 import '../bindings/documents_binding.dart';
+import '../bindings/filters_binding.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/pdf_generator_binding.dart';
 import '../bindings/pdf_viewer_binding.dart';
@@ -45,11 +47,13 @@ class AppRoutes {
     GetPage(
       name: AppConstants.cropEditorRoute,
       page: () => const CropEditorScreen(),
+      binding: CropEditorBinding(),
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppConstants.filtersRoute,
       page: () => const FiltersScreen(),
+      binding: FiltersBinding(),
       transition: Transition.rightToLeft,
     ),
     GetPage(

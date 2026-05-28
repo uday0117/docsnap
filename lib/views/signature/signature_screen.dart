@@ -1,8 +1,9 @@
 import 'dart:io';
-import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:signature/signature.dart' as sig_pkg;
+
 import '../../controllers/signature_controller.dart';
 import '../../models/signature_model.dart';
 import '../../themes/app_theme.dart';
@@ -13,12 +14,6 @@ class SignatureScreen extends GetView<SignatureController> {
 
   @override
   Widget build(BuildContext context) {
-    final drawController = sig_pkg.SignatureController(
-      penStrokeWidth: 3,
-      penColor: Colors.black,
-      exportBackgroundColor: Colors.white,
-    );
-
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -42,7 +37,6 @@ class SignatureScreen extends GetView<SignatureController> {
                 children: [
                   _DrawSignatureTab(
                     signatureCtrl: controller,
-                    drawController: drawController,
                   ),
                   _SavedSignaturesTab(ctrl: controller),
                 ],
@@ -55,14 +49,53 @@ class SignatureScreen extends GetView<SignatureController> {
   }
 }
 
-class _DrawSignatureTab extends StatelessWidget {
+class _DrawSignatureTab extends StatefulWidget {
   final SignatureController signatureCtrl;
-  final sig_pkg.SignatureController drawController;
 
   const _DrawSignatureTab({
     required this.signatureCtrl,
-    required this.drawController,
   });
+
+  @override
+  State<_DrawSignatureTab> createState() => _DrawSignatureTabState();
+}
+
+class _DrawSignatureTabState extends State<_DrawSignatureTab> {
+  late sig_pkg.SignatureController drawController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initController();
+  }
+
+  void _initController() {
+    drawController = sig_pkg.SignatureController(
+      penStrokeWidth: widget.signatureCtrl.strokeWidth.value,
+      penColor: widget.signatureCtrl.strokeColor.value,
+      exportBackgroundColor: Colors.white,
+    );
+  }
+
+  void _recreateController() {
+    final oldPoints = drawController.points;
+    drawController.dispose();
+    drawController = sig_pkg.SignatureController(
+      penStrokeWidth: widget.signatureCtrl.strokeWidth.value,
+      penColor: widget.signatureCtrl.strokeColor.value,
+      exportBackgroundColor: Colors.white,
+    );
+    if (oldPoints.isNotEmpty) {
+      drawController.points = oldPoints;
+    }
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    drawController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +161,7 @@ class _DrawSignatureTab extends StatelessWidget {
                     }
                     final data = await drawController.toPngBytes();
                     if (data != null) {
-                      await signatureCtrl.saveSignature(data);
+                      await widget.signatureCtrl.saveSignature(data);
                     }
                   },
                   icon: const Icon(Icons.save_rounded),
@@ -152,31 +185,153 @@ class _DrawSignatureTab extends StatelessWidget {
   }
 
   Widget _buildStrokeOptions(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Stroke Width:',
-            style: TextStyle(fontWeight: FontWeight.w500)),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Obx(
-            () => Slider(
-              value: signatureCtrl.strokeWidth.value,
-              min: 1.0,
-              max: 8.0,
-              divisions: 7,
-              activeColor: AppTheme.primaryColor,
-              onChanged: signatureCtrl.setStrokeWidth,
+        Row(
+          children: [
+            const Text('Stroke Width:',
+                style: TextStyle(fontWeight: FontWeight.w500)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Obx(
+                () => Slider(
+                  value: widget.signatureCtrl.strokeWidth.value,
+                  min: 1.0,
+                  max: 8.0,
+                  divisions: 7,
+                  activeColor: AppTheme.primaryColor,
+                  onChanged: (value) {
+                    widget.signatureCtrl.setStrokeWidth(value);
+                    _recreateController();
+                  },
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 8),
+            Obx(
+              () => Text(
+                '${widget.signatureCtrl.strokeWidth.value.round()}px',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Obx(
-          () => Text(
-            '${signatureCtrl.strokeWidth.value.round()}px',
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Text('Color:', style: TextStyle(fontWeight: FontWeight.w500)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Obx(
+                () => Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _ColorOption(
+                      color: Colors.black,
+                      isSelected: widget.signatureCtrl.strokeColor.value ==
+                          Colors.black,
+                      onTap: () {
+                        widget.signatureCtrl.setStrokeColor(Colors.black);
+                        _recreateController();
+                      },
+                    ),
+                    _ColorOption(
+                      color: Colors.blue,
+                      isSelected:
+                          widget.signatureCtrl.strokeColor.value == Colors.blue,
+                      onTap: () {
+                        widget.signatureCtrl.setStrokeColor(Colors.blue);
+                        _recreateController();
+                      },
+                    ),
+                    _ColorOption(
+                      color: Colors.red,
+                      isSelected:
+                          widget.signatureCtrl.strokeColor.value == Colors.red,
+                      onTap: () {
+                        widget.signatureCtrl.setStrokeColor(Colors.red);
+                        _recreateController();
+                      },
+                    ),
+                    _ColorOption(
+                      color: Colors.green,
+                      isSelected: widget.signatureCtrl.strokeColor.value ==
+                          Colors.green,
+                      onTap: () {
+                        widget.signatureCtrl.setStrokeColor(Colors.green);
+                        _recreateController();
+                      },
+                    ),
+                    _ColorOption(
+                      color: Colors.purple,
+                      isSelected: widget.signatureCtrl.strokeColor.value ==
+                          Colors.purple,
+                      onTap: () {
+                        widget.signatureCtrl.setStrokeColor(Colors.purple);
+                        _recreateController();
+                      },
+                    ),
+                    _ColorOption(
+                      color: Colors.orange,
+                      isSelected: widget.signatureCtrl.strokeColor.value ==
+                          Colors.orange,
+                      onTap: () {
+                        widget.signatureCtrl.setStrokeColor(Colors.orange);
+                        _recreateController();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ],
+    );
+  }
+}
+
+class _ColorOption extends StatelessWidget {
+  final Color color;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ColorOption({
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryColor : Colors.grey.shade300,
+            width: isSelected ? 3 : 2,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withAlpha(80),
+                    blurRadius: 8,
+                    spreadRadius: 2,
+                  ),
+                ]
+              : null,
+        ),
+        child: isSelected
+            ? const Icon(Icons.check, color: Colors.white, size: 20)
+            : null,
+      ),
     );
   }
 }
@@ -230,6 +385,7 @@ class _SavedSignaturesTab extends StatelessWidget {
             signature: sig,
             onSelect: () => ctrl.selectSavedSignature(sig),
             onDelete: () => ctrl.deleteSignature(sig),
+            onShare: () => ctrl.shareSignature(sig),
           );
         },
       );
@@ -241,11 +397,13 @@ class _SignatureCard extends StatelessWidget {
   final SignatureModel signature;
   final VoidCallback onSelect;
   final VoidCallback onDelete;
+  final VoidCallback onShare;
 
   const _SignatureCard({
     required this.signature,
     required this.onSelect,
     required this.onDelete,
+    required this.onShare,
   });
 
   @override
@@ -292,17 +450,37 @@ class _SignatureCard extends StatelessWidget {
             Positioned(
               top: 4,
               right: 4,
-              child: GestureDetector(
-                onTap: onDelete,
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: onShare,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.share,
+                          size: 14, color: Colors.white),
+                    ),
                   ),
-                  child: const Icon(Icons.close, size: 14, color: Colors.white),
-                ),
+                  const SizedBox(width: 4),
+                  GestureDetector(
+                    onTap: onDelete,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close,
+                          size: 14, color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

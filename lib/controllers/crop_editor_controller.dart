@@ -1,10 +1,11 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
+
 import '../models/scanned_page.dart';
 import '../services/image_processing_service.dart';
 import '../utils/app_helpers.dart';
+import 'scanner_controller.dart';
 
 class CropEditorController extends GetxController {
   final _imageService = Get.find<ImageProcessingService>();
@@ -35,14 +36,21 @@ class CropEditorController extends GetxController {
             toolbarTitle: 'Crop Document',
             toolbarColor: const Color(0xFF1565C0),
             toolbarWidgetColor: Colors.white,
+            statusBarColor: const Color(0xFF0D47A1),
+            backgroundColor: Colors.black,
             initAspectRatio: CropAspectRatioPreset.original,
             lockAspectRatio: false,
             hideBottomControls: false,
+            showCropGrid: true,
+            cropFrameColor: Colors.white,
+            cropGridColor: Colors.white54,
           ),
           IOSUiSettings(
             title: 'Crop Document',
             cancelButtonTitle: 'Cancel',
             doneButtonTitle: 'Done',
+            hidesNavigationBar: false,
+            minimumAspectRatio: 0.5,
           ),
         ],
       );
@@ -79,21 +87,63 @@ class CropEditorController extends GetxController {
   }
 
   Future<void> applyAndAddPage() async {
-    if (imagePath.value.isEmpty) return;
+    if (imagePath.value.isEmpty) {
+      AppHelpers.showSnackbar('No image to process', isError: true);
+      return;
+    }
 
-    final savedPath = await _imageService.saveImageToDocsnap(imagePath.value);
-    final page = ScannedPage(imagePath: savedPath);
+    isProcessing.value = true;
 
-    if (scannerController != null) {
-      scannerController.addScannedPage(page);
-      AppHelpers.showSnackbar('Page added successfully!');
+    try {
+      final page = ScannedPage(imagePath: imagePath.value);
+
+      // Try to find scanner controller
+      dynamic scanner = scannerController;
+      if (scanner == null) {
+        try {
+          scanner = Get.find<ScannerController>();
+        } catch (_) {
+          Get.back(result: page);
+          return;
+        }
+      }
+
+      scanner.addScannedPage(page);
       Get.back();
-    } else {
-      Get.back(result: page);
+      await Future.delayed(const Duration(milliseconds: 100));
+      AppHelpers.showSnackbar('Page added!');
+    } catch (e) {
+      Get.back();
+      AppHelpers.showSnackbar('Error: $e', isError: true);
+    } finally {
+      isProcessing.value = false;
     }
   }
 
   void cancel() {
-    Get.back();
+    Get.back(result: 'cancelled');
+  }
+
+  // Quick add without any adjustments
+  Future<void> skipAndAddPage() async {
+    if (imagePath.value.isEmpty) return;
+
+    try {
+      isProcessing.value = true;
+
+      final page = ScannedPage(imagePath: imagePath.value);
+
+      if (scannerController != null) {
+        await Future.delayed(const Duration(milliseconds: 50));
+        scannerController.addScannedPage(page);
+        AppHelpers.showSnackbar('Page added!');
+        Get.back(result: 'added');
+      } else {
+        Get.back(result: page);
+      }
+    } catch (e) {
+      AppHelpers.showSnackbar('Error: $e', isError: true);
+      isProcessing.value = false;
+    }
   }
 }

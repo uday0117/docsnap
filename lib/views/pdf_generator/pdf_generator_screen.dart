@@ -1,8 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../controllers/pdf_generator_controller.dart';
-import '../../controllers/settings_controller.dart';
 import '../../themes/app_theme.dart';
 import '../../utils/app_constants.dart';
 import '../../widgets/app_button.dart';
