@@ -62,9 +62,12 @@ class DocumentCard extends StatelessWidget {
                           color: Colors.red.shade400,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          '${document.pageCount} ${document.pageCount == 1 ? 'page' : 'pages'}',
-                          style: theme.textTheme.bodySmall,
+                        Flexible(
+                          child: Text(
+                            '${document.pageCount} ${document.pageCount == 1 ? 'page' : 'pages'}',
+                            style: theme.textTheme.bodySmall,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Icon(
@@ -73,9 +76,12 @@ class DocumentCard extends StatelessWidget {
                           color: Colors.grey.shade400,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          AppHelpers.formatFileSize(document.sizeBytes),
-                          style: theme.textTheme.bodySmall,
+                        Flexible(
+                          child: Text(
+                            AppHelpers.formatFileSize(document.sizeBytes),
+                            style: theme.textTheme.bodySmall,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),
@@ -88,17 +94,23 @@ class DocumentCard extends StatelessWidget {
                           color: AppTheme.primaryColor,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          document.folder,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppTheme.primaryColor,
-                            fontWeight: FontWeight.w500,
+                        Flexible(
+                          child: Text(
+                            document.folder,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: AppTheme.primaryColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const Spacer(),
-                        Text(
-                          AppHelpers.formatDate(document.updatedAt),
-                          style: theme.textTheme.bodySmall,
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            AppHelpers.formatDate(document.updatedAt),
+                            style: theme.textTheme.bodySmall,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),

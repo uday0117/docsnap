@@ -36,6 +36,13 @@ class SectionHeader extends StatelessWidget {
           if (actionLabel != null)
             TextButton(
               onPressed: onAction,
+              style: TextButton.styleFrom(
+                textStyle: const TextStyle(
+                  inherit: false,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               child: Text(actionLabel!),
             ),
         ],

@@ -82,6 +82,8 @@ flutter:
 
   assets:
     - assets/icon/
+    - docs/privacy_policy.html
+    - docs/terms_and_conditions.html
 
   # To add assets to your application, add an assets section, like this:
   # assets:
