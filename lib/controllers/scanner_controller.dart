@@ -111,19 +111,28 @@ class ScannerController extends GetxController {
   }
 
   Future<void> importFromGallery() async {
-    final hasPermission = await _permissionService.requestStoragePermission();
-    if (!hasPermission) return;
+    try {
+      final List<XFile> images = await _picker.pickMultiImage(imageQuality: 95);
 
-    final List<XFile> images = await _picker.pickMultiImage(imageQuality: 95);
-    if (images.isEmpty) return;
+      if (images.isEmpty) {
+        return;
+      }
 
-    // Process images sequentially to avoid navigation stack corruption
-    for (final image in images) {
-      final savedPath = await _saveImageToTemp(image.path);
-      final result = await _openCropEditor(savedPath);
+      // Process images sequentially to avoid navigation stack corruption
+      for (final image in images) {
+        final savedPath = await _saveImageToTemp(image.path);
+        final result = await _openCropEditor(savedPath);
 
-      // If user cancels, stop importing remaining images
-      if (result == null) break;
+        // If user cancels, stop importing remaining images
+        if (result == null) {
+          break;
+        }
+      }
+    } catch (e) {
+      AppHelpers.showSnackbar(
+        'Failed to import images.',
+        isError: true,
+      );
     }
   }
 
