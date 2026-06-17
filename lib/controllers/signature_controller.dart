@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:docsnap/services/ad_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as p;
@@ -20,6 +21,7 @@ class SignatureController extends GetxController {
   final _shareService = Get.find<ShareService>();
   final _documentRepository = Get.find<DocumentRepository>();
   final _pdfService = Get.find<PdfService>();
+  final _adService = Get.find<AdService>();
 
   SignatureController(this._repository);
 
@@ -65,11 +67,39 @@ class SignatureController extends GetxController {
       _repository.saveSignature(signature);
       loadSignatures();
       AppHelpers.hideLoading();
-      AppHelpers.showSnackbar('Signature saved!');
 
-      if (targetDocument.value != null) {
-        await _applySignatureToDocument(filePath);
-      }
+      Get.dialog(
+        AlertDialog(
+          title: const Text('Signature Saved'),
+          content: const Text(
+            'Support DocSnap by watching a short ad.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+
+                if (targetDocument.value != null) {
+                  _applySignatureToDocument(filePath);
+                }
+              },
+              child: const Text('No Thanks'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Get.back();
+
+                await _adService.showRewardedAdIfReady();
+
+                if (targetDocument.value != null) {
+                  await _applySignatureToDocument(filePath);
+                }
+              },
+              child: const Text('Watch Ad'),
+            ),
+          ],
+        ),
+      );
     } catch (e) {
       AppHelpers.hideLoading();
       AppHelpers.showSnackbar('Failed to save: $e', isError: true);

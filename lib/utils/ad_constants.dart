@@ -13,6 +13,8 @@ class AdConstants {
   static const String interstitialAdUnitId =
       'ca-app-pub-1451522103593938/2910513600';
 
+  static const String rewardedAdUnitId =
+      'ca-app-pub-1451522103593938/3196087089';
   static void validatePlatform() {
     if (!Platform.isAndroid) {
       throw UnsupportedError('DocSnap currently supports Android ads only.');
