@@ -52,14 +52,16 @@ class SectionHeader extends StatelessWidget {
 }
 
 class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
+  final String? title;
+  final Widget? titleWidget;
   final List<Widget>? actions;
   final bool showBack;
   final Widget? leading;
 
   const GradientAppBar({
     super.key,
-    required this.title,
+    this.title,
+    this.titleWidget,
     this.actions,
     this.showBack = true,
     this.leading,
@@ -71,28 +73,11 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(title),
+      title: titleWidget ?? Text(title ?? ''),
       backgroundColor: AppTheme.primaryColor,
       foregroundColor: Colors.white,
-      elevation: 0,
       centerTitle: true,
-      leading: leading ??
-          (showBack
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                  onPressed: () => Navigator.pop(context),
-                )
-              : null),
       actions: actions,
-      flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppTheme.primaryDark, AppTheme.primaryLight],
-          ),
-        ),
-      ),
     );
   }
 }

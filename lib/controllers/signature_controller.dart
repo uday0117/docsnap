@@ -7,14 +7,19 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/document_model.dart';
 import '../models/signature_model.dart';
+import '../repositories/document_repository.dart';
 import '../repositories/signature_repository.dart';
+import '../services/pdf_service.dart';
 import '../services/share_service.dart';
 import '../utils/app_helpers.dart';
 
 class SignatureController extends GetxController {
   final SignatureRepository _repository;
   final _shareService = Get.find<ShareService>();
+  final _documentRepository = Get.find<DocumentRepository>();
+  final _pdfService = Get.find<PdfService>();
 
   SignatureController(this._repository);
 
@@ -23,11 +28,16 @@ class SignatureController extends GetxController {
   final RxBool hasSignature = false.obs;
   final RxDouble strokeWidth = 3.0.obs;
   final Rx<Color> strokeColor = Colors.black.obs;
+  final Rxn<DocumentModel> targetDocument = Rxn<DocumentModel>();
 
   @override
   void onInit() {
     super.onInit();
     loadSignatures();
+    final args = Get.arguments;
+    if (args is DocumentModel) {
+      targetDocument.value = args;
+    }
   }
 
   void loadSignatures() {
@@ -56,9 +66,52 @@ class SignatureController extends GetxController {
       loadSignatures();
       AppHelpers.hideLoading();
       AppHelpers.showSnackbar('Signature saved!');
+
+      if (targetDocument.value != null) {
+        await _applySignatureToDocument(filePath);
+      }
     } catch (e) {
       AppHelpers.hideLoading();
       AppHelpers.showSnackbar('Failed to save: $e', isError: true);
+    }
+  }
+
+  Future<void> applySavedSignatureToDocument(SignatureModel sig) async {
+    final doc = targetDocument.value;
+    if (doc == null) {
+      Get.back(result: sig);
+      return;
+    }
+
+    await _applySignatureToDocument(sig.imagePath);
+  }
+
+  Future<void> _applySignatureToDocument(String signaturePath) async {
+    final doc = targetDocument.value;
+    if (doc == null) return;
+
+    AppHelpers.showLoading('Applying signature to PDF...');
+    try {
+      await _pdfService.applySignatureToPdf(
+        pdfPath: doc.pdfPath,
+        pageImagePaths: doc.pageImagePaths,
+        signatureImagePath: signaturePath,
+      );
+
+      final newSize = await _pdfService.getPdfFileSize(doc.pdfPath);
+      final updated = doc.copyWith(
+        sizeBytes: newSize,
+        updatedAt: DateTime.now(),
+      );
+      _documentRepository.saveDocument(updated);
+      targetDocument.value = updated;
+
+      AppHelpers.hideLoading();
+      AppHelpers.showSnackbar('Signature applied to PDF!');
+      Get.back(result: updated);
+    } catch (e) {
+      AppHelpers.hideLoading();
+      AppHelpers.showSnackbar('Failed to apply signature: $e', isError: true);
     }
   }
 
@@ -84,7 +137,11 @@ class SignatureController extends GetxController {
   }
 
   void selectSavedSignature(SignatureModel sig) {
-    Get.back(result: sig);
+    if (targetDocument.value != null) {
+      applySavedSignatureToDocument(sig);
+    } else {
+      Get.back(result: sig);
+    }
   }
 
   Future<void> shareSignature(SignatureModel sig) async {

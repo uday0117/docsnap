@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../controllers/documents_controller.dart';
 import '../../themes/app_theme.dart';
 import '../../utils/app_constants.dart';
+import '../../widgets/ad_banner_widget.dart';
 import '../../widgets/document_card.dart';
 import '../../widgets/empty_state.dart';
 
@@ -17,9 +18,16 @@ class DocumentsScreen extends GetView<DocumentsController> {
       appBar: _buildAppBar(context),
       body: Column(
         children: [
-          _buildFolderTabs(context),
-          _buildSortBar(context),
-          Expanded(child: _buildDocumentList(context)),
+          Expanded(
+            child: Column(
+              children: [
+                _buildFolderTabs(context),
+                _buildSortBar(context),
+                Expanded(child: _buildDocumentList(context)),
+              ],
+            ),
+          ),
+          const AdBannerWidget(),
         ],
       ),
       floatingActionButton: FloatingActionButton(

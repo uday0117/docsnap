@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../controllers/settings_controller.dart';
 import '../../themes/app_theme.dart';
 import '../../utils/app_constants.dart';
+import '../../utils/app_helpers.dart';
 import '../../widgets/common_widgets.dart';
 
 class SettingsScreen extends GetView<SettingsController> {
@@ -58,6 +59,40 @@ class SettingsScreen extends GetView<SettingsController> {
                     if (v != null) controller.setLanguage(v);
                   },
                 ),
+              ),
+            ]),
+            const SizedBox(height: 16),
+            _buildSectionTitle(context, 'Appearance'),
+            _buildSettingsCard([
+              SwitchListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                secondary: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.indigo.withAlpha(26),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    controller.isDarkMode
+                        ? Icons.dark_mode_rounded
+                        : Icons.light_mode_rounded,
+                    color: Colors.indigo,
+                    size: 20,
+                  ),
+                ),
+                title: const Text(
+                  'Dark Mode',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                subtitle: const Text(
+                  'Switch between light and dark theme',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                value: controller.isDarkMode,
+                activeThumbColor: AppTheme.primaryColor,
+                onChanged: controller.toggleDarkMode,
               ),
             ]),
             const SizedBox(height: 16),
@@ -234,9 +269,24 @@ class SettingsScreen extends GetView<SettingsController> {
       ),
     );
     if (confirmed == true) {
-      // Note: This would also need to delete physical files
-      Get.snackbar('Cleared', 'All data has been cleared.',
-          snackPosition: SnackPosition.BOTTOM);
+      AppHelpers.showLoading('Clearing data...');
+      try {
+        await controller.clearAllData();
+        AppHelpers.hideLoading();
+        Get.offAllNamed(AppConstants.homeRoute);
+        Get.snackbar(
+          'Cleared',
+          'All data has been cleared.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } catch (e) {
+        AppHelpers.hideLoading();
+        Get.snackbar(
+          'error'.tr,
+          'Failed to clear data: $e',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
     }
   }
 }

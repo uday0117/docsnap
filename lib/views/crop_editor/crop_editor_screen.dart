@@ -88,6 +88,11 @@ class CropEditorScreen extends StatelessWidget {
                 label: 'crop'.tr,
                 onTap: ctrl.openSystemCropper,
               ),
+              _ToolButton(
+                icon: Icons.filter_rounded,
+                label: 'filters'.tr,
+                onTap: ctrl.openFilters,
+              ),
             ],
           ),
           const SizedBox(height: 16),

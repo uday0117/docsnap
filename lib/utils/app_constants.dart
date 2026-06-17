@@ -76,8 +76,8 @@ class AppConstants {
   static const String settingsRoute = '/settings';
   static const String pdfGeneratorRoute = '/pdf-generator';
 
-  // App version
-  static const String appVersion = '1.0.0';
+  // App version (keep in sync with pubspec.yaml)
+  static const String appVersion = '1.0.1';
 
   // URLs
   static const String privacyPolicyUrl =

@@ -13,8 +13,6 @@ class PdfViewerScreen extends GetView<PdfViewerController> {
 
   @override
   Widget build(BuildContext context) {
-    final pdfViewerKey = GlobalKey<SfPdfViewerState>();
-
     return Scaffold(
       appBar: _buildAppBar(),
       body: Obx(() {
@@ -38,12 +36,16 @@ class PdfViewerScreen extends GetView<PdfViewerController> {
         return Column(
           children: [
             Expanded(
-              child: SfPdfViewer.file(
-                file,
-                key: pdfViewerKey,
-                onPageChanged: (PdfPageChangedDetails details) {
-                  controller.updateCurrentPage(details.newPageNumber);
-                },
+              child: Obx(
+                () => SfPdfViewer.file(
+                  file,
+                  key: ValueKey(
+                    '${controller.pdfPath.value}_${controller.pdfReloadKey.value}',
+                  ),
+                  onPageChanged: (PdfPageChangedDetails details) {
+                    controller.updateCurrentPage(details.newPageNumber);
+                  },
+                ),
               ),
             ),
             _buildPageIndicator(),

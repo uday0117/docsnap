@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../models/document_model.dart';
 import '../models/scanned_page.dart';
 import '../repositories/document_repository.dart';
+import '../services/ad_service.dart';
+import '../services/image_processing_service.dart';
 import '../services/pdf_service.dart';
 import '../utils/app_constants.dart';
 import '../utils/app_helpers.dart';
@@ -10,6 +12,7 @@ import '../utils/app_helpers.dart';
 class PdfGeneratorController extends GetxController {
   final DocumentRepository _repository;
   final PdfService _pdfService;
+  final _imageService = Get.find<ImageProcessingService>();
 
   PdfGeneratorController(this._repository, this._pdfService);
 
@@ -74,7 +77,9 @@ class PdfGeneratorController extends GetxController {
       );
 
       final fileSize = await _pdfService.getPdfFileSize(pdfPath);
-      final thumbnail = imagePaths.isNotEmpty ? imagePaths.first : null;
+      final thumbnail = imagePaths.isNotEmpty
+          ? await _imageService.generateThumbnail(imagePaths.first)
+          : null;
 
       final doc = DocumentModel(
         name: documentName.value.trim(),
@@ -89,6 +94,11 @@ class PdfGeneratorController extends GetxController {
       _repository.saveDocument(doc);
       AppHelpers.hideLoading();
       AppHelpers.showSnackbar('PDF saved successfully!');
+
+      try {
+        await Get.find<AdService>().showInterstitialIfReady();
+      } catch (_) {}
+
       Get.offAllNamed(AppConstants.homeRoute);
     } catch (e) {
       AppHelpers.hideLoading();

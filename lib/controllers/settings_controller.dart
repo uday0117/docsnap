@@ -72,6 +72,13 @@ class SettingsController extends GetxController {
     _applyTheme(value);
   }
 
+  Future<void> clearAllData() async {
+    await _storage.clearAllData();
+    settings.value = const AppSettings();
+    _applyTheme(false);
+    Get.updateLocale(const Locale('en', 'US'));
+  }
+
   void _saveSettings() {
     _storage.writeSettings(settings.value);
   }

@@ -18,7 +18,13 @@ class SignatureScreen extends GetView<SignatureController> {
       length: 2,
       child: Scaffold(
         appBar: GradientAppBar(
-          title: 'Signature',
+          titleWidget: Obx(
+            () => Text(
+              controller.targetDocument.value != null
+                  ? 'Sign PDF'
+                  : 'Signature',
+            ),
+          ),
           actions: const [],
         ),
         body: Column(
@@ -220,7 +226,8 @@ class _DrawSignatureTabState extends State<_DrawSignatureTab> {
         const SizedBox(height: 8),
         Row(
           children: [
-            Text('color'.tr, style: const TextStyle(fontWeight: FontWeight.w500)),
+            Text('color'.tr,
+                style: const TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(width: 12),
             Expanded(
               child: Obx(

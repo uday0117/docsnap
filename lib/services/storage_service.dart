@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../models/app_settings.dart';
 import '../models/document_model.dart';
@@ -77,4 +80,14 @@ class StorageService extends GetxService {
 
   void remove(String key) => _box.remove(key);
   void clearAll() => _box.erase();
+
+  /// Deletes all app files and clears persisted storage.
+  Future<void> clearAllData() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final docsnapDir = Directory('${dir.path}/docsnap');
+    if (await docsnapDir.exists()) {
+      await docsnapDir.delete(recursive: true);
+    }
+    clearAll();
+  }
 }

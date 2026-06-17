@@ -26,8 +26,15 @@ class HomeController extends GetxController {
     recentDocuments.value = docs.take(5).toList();
   }
 
-  void navigateToScanner() {
-    Get.toNamed(AppConstants.scannerRoute);
+  void navigateToScanner({bool openGallery = false}) {
+    Get.toNamed(
+      AppConstants.scannerRoute,
+      arguments: openGallery ? {'openGallery': true} : null,
+    );
+  }
+
+  void navigateToGalleryImport() {
+    navigateToScanner(openGallery: true);
   }
 
   void navigateToDocuments() {

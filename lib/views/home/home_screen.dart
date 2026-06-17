@@ -9,6 +9,7 @@ import '../../models/document_model.dart';
 import '../../themes/app_theme.dart';
 import '../../utils/app_constants.dart';
 import '../../utils/app_helpers.dart';
+import '../../widgets/ad_banner_widget.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/empty_state.dart';
 
@@ -21,18 +22,24 @@ class HomeScreen extends GetView<HomeController> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(context, settingsCtrl),
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                _buildStatsRow(context),
-                const SizedBox(height: 20),
-                _buildQuickActions(context),
-                const SizedBox(height: 24),
-                _buildRecentDocuments(context),
-                const SizedBox(height: 100),
+      body: Column(
+        children: [
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                _buildSliverAppBar(context, settingsCtrl),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      _buildStatsRow(context),
+                      const SizedBox(height: 20),
+                      _buildQuickActions(context),
+                      const SizedBox(height: 24),
+                      _buildRecentDocuments(context),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -45,6 +52,7 @@ class HomeScreen extends GetView<HomeController> {
         backgroundColor: AppTheme.primaryColor,
         foregroundColor: Colors.white,
       ),
+      bottomNavigationBar: const AdBannerWidget(),
     );
   }
 
@@ -181,7 +189,7 @@ class HomeScreen extends GetView<HomeController> {
                   icon: Icons.photo_library_rounded,
                   label: 'Import from\nGallery',
                   color: const Color(0xFF7B1FA2),
-                  onTap: controller.navigateToScanner,
+                  onTap: controller.navigateToGalleryImport,
                 ),
               ),
               const SizedBox(width: 12),

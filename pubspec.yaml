@@ -2,7 +2,7 @@ name: docsnap
 description: "DocSnap - PDF Scanner. Scan, crop, filter and manage documents."
 publish_to: 'none'
 
-version: 1.0.1+2
+version: 1.0.2+3
 
 environment:
   sdk: ^3.5.0
@@ -51,6 +51,7 @@ dependencies:
   reorderable_grid_view: ^2.2.8
   url_launcher: ^6.3.1
   firebase_core: ^4.10.0
+  google_mobile_ads: ^9.0.0
 
 dev_dependencies:
   flutter_test:

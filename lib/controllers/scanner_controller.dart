@@ -34,6 +34,14 @@ class ScannerController extends GetxController {
   void onInit() {
     super.onInit();
     _initCamera();
+    _handleLaunchArgs();
+  }
+
+  void _handleLaunchArgs() {
+    final args = Get.arguments as Map<String, dynamic>?;
+    if (args?['openGallery'] == true) {
+      Future.delayed(const Duration(milliseconds: 500), importFromGallery);
+    }
   }
 
   Future<void> _initCamera() async {

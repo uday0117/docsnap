@@ -4,6 +4,7 @@ import 'package:image_cropper/image_cropper.dart';
 
 import '../models/scanned_page.dart';
 import '../services/image_processing_service.dart';
+import '../utils/app_constants.dart';
 import '../utils/app_helpers.dart';
 import 'scanner_controller.dart';
 
@@ -83,6 +84,20 @@ class CropEditorController extends GetxController {
       imagePath.value = rotated;
     } finally {
       isProcessing.value = false;
+    }
+  }
+
+  Future<void> openFilters() async {
+    if (imagePath.value.isEmpty) return;
+
+    final page = ScannedPage(imagePath: imagePath.value);
+    final result = await Get.toNamed(
+      AppConstants.filtersRoute,
+      arguments: page,
+    );
+
+    if (result is ScannedPage) {
+      imagePath.value = result.imagePath;
     }
   }
 
