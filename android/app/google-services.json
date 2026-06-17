@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "585937685278",
+    "project_id": "doc-snap-afaab",
+    "storage_bucket": "doc-snap-afaab.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:585937685278:android:daa74a643f0be24313970f",
+        "android_client_info": {
+          "package_name": "com.uksolutions.docsnap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqAXDr6TeqizkEXE41-41RDPlG5fFFiuM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
