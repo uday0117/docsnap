@@ -1,11 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-import '../utils/ad_constants.dart';
+import '../services/ad_service.dart';
 
-/// Adaptive banner ad shown at the bottom of key screens.
+/// Adaptive banner ad shown at the bottom of key screens (Android only).
+/// Uses a single shared [BannerAd] via [AdService]; only the topmost host
+/// on the navigation stack mounts [AdWidget] to avoid duplicate-ad crashes.
 class AdBannerWidget extends StatefulWidget {
   const AdBannerWidget({super.key});
 
@@ -14,88 +17,66 @@ class AdBannerWidget extends StatefulWidget {
 }
 
 class _AdBannerWidgetState extends State<AdBannerWidget> {
-  BannerAd? _bannerAd;
-  bool _isLoaded = false;
+  final _hostToken = Object();
+  late final AdService _adService;
 
-  bool get _isMobilePlatform =>
-      !Platform.isWindows &&
-      !Platform.isLinux &&
-      !Platform.isMacOS &&
-      (Platform.isAndroid || Platform.isIOS);
+  bool get _isAndroid => Platform.isAndroid;
+
+  @override
+  void initState() {
+    super.initState();
+    _adService = Get.find<AdService>();
+    _adService.registerBannerHost(_hostToken);
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_bannerAd == null && _isMobilePlatform) {
-      _loadBanner();
+    if (_isAndroid) {
+      _adService.loadBannerAd(MediaQuery.sizeOf(context).width);
     }
-  }
-
-  Future<void> _loadBanner() async {
-    final width = MediaQuery.sizeOf(context).width.truncate();
-    final size =
-        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width);
-    if (size == null || !mounted) return;
-
-    final banner = BannerAd(
-      adUnitId: AdConstants.bannerAdUnitId,
-      size: size,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          debugPrint('✅ BANNER LOADED');
-          if (mounted) {
-            setState(() {
-              _isLoaded = true;
-            });
-          }
-        },
-        onAdFailedToLoad: (ad, error) {
-          debugPrint('❌ BANNER FAILED');
-          debugPrint('Code: ${error.code}');
-          debugPrint('Message: ${error.message}');
-          ad.dispose();
-
-          if (mounted) {
-            setState(() {
-              _bannerAd = null;
-              _isLoaded = false;
-            });
-          }
-        },
-      ),
-    );
-
-    await banner.load();
-    if (!mounted) {
-      banner.dispose();
-      return;
-    }
-
-    setState(() {
-      _bannerAd = banner;
-    });
   }
 
   @override
   void dispose() {
-    _bannerAd?.dispose();
+    _adService.unregisterBannerHost(_hostToken);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isMobilePlatform || !_isLoaded || _bannerAd == null) {
-      return const SizedBox.shrink();
-    }
+    if (!_isAndroid) return const SizedBox.shrink();
 
-    return SafeArea(
-      top: false,
-      child: SizedBox(
-        width: _bannerAd!.size.width.toDouble(),
-        height: _bannerAd!.size.height.toDouble(),
-        child: AdWidget(ad: _bannerAd!),
-      ),
-    );
+    return Obx(() {
+      // Observe host changes and load state.
+      _adService.bannerHostChanged.value;
+
+      if (!_adService.shouldShowBanner(_hostToken)) {
+        return const SizedBox.shrink();
+      }
+
+      final banner = _adService.bannerAd;
+      if (banner == null) return const SizedBox.shrink();
+
+      return ColoredBox(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1C1C1E)
+            : Colors.white,
+        child: SizedBox(
+          width: double.infinity,
+          height: banner.size.height.toDouble(),
+          child: Center(
+            child: SizedBox(
+              width: banner.size.width.toDouble(),
+              height: banner.size.height.toDouble(),
+              child: AdWidget(
+                key: ValueKey(banner.hashCode),
+                ad: banner,
+              ),
+            ),
+          ),
+        ),
+      );
+    });
   }
 }

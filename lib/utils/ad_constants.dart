@@ -1,23 +1,21 @@
-import 'dart:io';
-
 class AdConstants {
   AdConstants._();
 
   static const String androidAppId = 'ca-app-pub-1451522103593938~2607261274';
 
-  /// Banner Ad Unit ID
+  /// DocSnap-HomeBanner (Banner)
+  static const String bannerAdUnitId =
+      'ca-app-pub-1451522103593938/6849758619';
 
-  static const String bannerAdUnitId = 'ca-app-pub-1451522103593938/6849758619';
-
-  /// Interstitial Ad Unit ID
+  /// Docsnap-Interstitial (Interstitial)
   static const String interstitialAdUnitId =
       'ca-app-pub-1451522103593938/2910513600';
 
+  /// DocSnap Rewarded (Rewarded)
   static const String rewardedAdUnitId =
       'ca-app-pub-1451522103593938/3196087089';
-  static void validatePlatform() {
-    if (!Platform.isAndroid) {
-      throw UnsupportedError('DocSnap currently supports Android ads only.');
-    }
-  }
+
+  /// App open — not in your current AdMob list; create a unit or remove usage.
+  static const String appOpenAdUnitId =
+      'ca-app-pub-1451522103593938/9257395921';
 }

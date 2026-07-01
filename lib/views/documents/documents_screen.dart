@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../controllers/documents_controller.dart';
 import '../../themes/app_theme.dart';
 import '../../utils/app_constants.dart';
-import '../../widgets/ad_banner_widget.dart';
+import '../../widgets/common_widgets.dart';
 import '../../widgets/document_card.dart';
 import '../../widgets/empty_state.dart';
 
@@ -18,68 +18,83 @@ class DocumentsScreen extends GetView<DocumentsController> {
       appBar: _buildAppBar(context),
       body: Column(
         children: [
-          Expanded(
-            child: Column(
-              children: [
-                _buildFolderTabs(context),
-                _buildSortBar(context),
-                Expanded(child: _buildDocumentList(context)),
-              ],
-            ),
-          ),
-          const AdBannerWidget(),
+          _buildSortBar(context),
+          Expanded(child: _buildDocumentList(context)),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(AppConstants.scannerRoute),
-        backgroundColor: AppTheme.primaryColor,
-        child: const Icon(Icons.add_rounded, color: Colors.white),
+      floatingActionButton: Obx(
+        () => controller.showTrashOnly.value
+            ? const SizedBox.shrink()
+            : FloatingActionButton(
+                onPressed: () => Get.toNamed(AppConstants.scannerRoute),
+                backgroundColor: AppTheme.primaryColor,
+                child: const Icon(Icons.add_rounded, color: Colors.white),
+              ),
       ),
     );
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: AppTheme.primaryColor,
-      foregroundColor: Colors.white,
-      title: Obx(() {
+    return GradientAppBar(
+      showBack: false,
+      titleWidget: Obx(() {
         if (controller.isSearching.value) {
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-            ),
-            child: TextField(
-              autofocus: true,
-              onChanged: controller.setSearch,
-              cursorColor: AppTheme.primaryColor,
-              decoration: InputDecoration(
-                hintText: 'search'.tr,
-                border: InputBorder.none,
-                hintStyle: TextStyle(color: Colors.grey),
-                isDense: true,
-                contentPadding: EdgeInsets.zero,
-              ),
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                decoration: TextDecoration.none,
-              ),
+          return TextField(
+            autofocus: true,
+            onChanged: controller.setSearch,
+            cursorColor: Colors.white,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+            decoration: InputDecoration(
+              hintText: 'search'.tr,
+              hintStyle: TextStyle(color: Colors.white.withAlpha(160)),
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
             ),
           );
         }
-        return Text('my_documents'.tr);
+        return Text(
+          controller.showTrashOnly.value
+              ? 'trash'.tr
+              : controller.showFavoritesOnly.value
+                  ? 'favorites'.tr
+                  : 'my_documents'.tr,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        );
       }),
-      elevation: 0,
       actions: [
         Obx(
           () => IconButton(
             icon: Icon(
-              controller.isSearching.value ? Icons.close : Icons.search,
+              controller.showTrashOnly.value
+                  ? Icons.delete_sweep_rounded
+                  : Icons.delete_outline_rounded,
+              color: controller.showTrashOnly.value ? Colors.amber : null,
             ),
-            onPressed: controller.toggleSearch,
+            tooltip: controller.showTrashOnly.value
+                ? 'empty_trash'.tr
+                : 'trash'.tr,
+            onPressed: controller.showTrashOnly.value
+                ? controller.emptyTrash
+                : controller.toggleTrashView,
           ),
+        ),
+        Obx(
+          () => controller.showTrashOnly.value
+              ? IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: controller.toggleTrashView,
+                )
+              : IconButton(
+                  icon: Icon(
+                    controller.isSearching.value ? Icons.close : Icons.search,
+                  ),
+                  onPressed: controller.toggleSearch,
+                ),
         ),
         PopupMenuButton<String>(
           icon: const Icon(Icons.sort),
@@ -87,54 +102,14 @@ class DocumentsScreen extends GetView<DocumentsController> {
             borderRadius: BorderRadius.circular(12),
           ),
           onSelected: controller.setSortBy,
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'date', child: Text('Sort by Date')),
-            PopupMenuItem(value: 'name', child: Text('Sort by Name')),
-            PopupMenuItem(value: 'size', child: Text('Sort by Size')),
+          itemBuilder: (_) => [
+            PopupMenuItem(value: 'date', child: Text('sort_by_date'.tr)),
+            PopupMenuItem(value: 'name', child: Text('sort_by_name'.tr)),
+            PopupMenuItem(value: 'size', child: Text('sort_by_size'.tr)),
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildFolderTabs(BuildContext context) {
-    return Container(
-      color: AppTheme.primaryColor,
-      child: Obx(
-        () => SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            children: AppConstants.defaultFolders.map((folder) {
-              final isSelected = controller.selectedFolder.value == folder;
-              return GestureDetector(
-                onTap: () => controller.setFolder(folder),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.only(right: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 7,
-                  ),
-                  decoration: BoxDecoration(
-                    color:
-                        isSelected ? Colors.white : Colors.white.withAlpha(30),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    folder,
-                    style: TextStyle(
-                      color: isSelected ? AppTheme.primaryColor : Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-      ),
+      bottom: _FolderTabsBar(),
     );
   }
 
@@ -145,7 +120,13 @@ class DocumentsScreen extends GetView<DocumentsController> {
         child: Row(
           children: [
             Text(
-              '${controller.filteredDocuments.length} document${controller.filteredDocuments.length == 1 ? '' : 's'}',
+              controller.filteredDocuments.length == 1
+                  ? 'document_count_one'.trParams({
+                      'count': '${controller.filteredDocuments.length}',
+                    })
+                  : 'document_count_other'.trParams({
+                      'count': '${controller.filteredDocuments.length}',
+                    }),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey,
                   ),
@@ -157,10 +138,10 @@ class DocumentsScreen extends GetView<DocumentsController> {
                 const SizedBox(width: 4),
                 Text(
                   controller.sortBy.value == 'date'
-                      ? 'Date'
+                      ? 'date'.tr
                       : controller.sortBy.value == 'name'
-                          ? 'Name'
-                          : 'Size',
+                          ? 'name'.tr
+                          : 'size'.tr,
                   style: const TextStyle(
                     fontSize: 13,
                     color: Colors.grey,
@@ -178,15 +159,38 @@ class DocumentsScreen extends GetView<DocumentsController> {
     return Obx(() {
       if (controller.filteredDocuments.isEmpty) {
         return EmptyState(
-          icon: Icons.folder_open_rounded,
-          title: controller.searchQuery.value.isNotEmpty
-              ? 'No results found'
-              : 'No documents yet',
-          subtitle: controller.searchQuery.value.isNotEmpty
-              ? 'Try a different search term.'
-              : 'Scan or import a document to see it here.',
-          actionLabel: 'Scan Document',
-          onAction: () => Get.toNamed(AppConstants.scannerRoute),
+          icon: controller.showTrashOnly.value
+              ? Icons.delete_outline_rounded
+              : controller.showFavoritesOnly.value
+                  ? Icons.favorite_border_rounded
+                  : Icons.folder_open_rounded,
+          title: controller.showTrashOnly.value
+              ? 'no_trash'.tr
+              : controller.showFavoritesOnly.value
+                  ? 'no_favorites'.tr
+                  : controller.searchQuery.value.isNotEmpty
+                      ? 'no_results'.tr
+                      : 'no_documents'.tr,
+          subtitle: controller.showTrashOnly.value
+              ? 'no_trash_hint'.tr
+              : controller.showFavoritesOnly.value
+                  ? 'no_favorites_hint'.tr
+                  : controller.searchQuery.value.isNotEmpty
+                      ? 'try_different_search'.tr
+                      : 'scan_import_hint'.tr,
+          actionLabel: controller.showTrashOnly.value
+              ? 'browse_documents'.tr
+              : controller.showFavoritesOnly.value
+                  ? 'browse_documents'.tr
+                  : 'scan_document'.tr,
+          onAction: controller.showTrashOnly.value
+              ? controller.toggleTrashView
+              : controller.showFavoritesOnly.value
+                  ? () {
+                      controller.showFavoritesOnly.value = false;
+                      controller.setFolder('All Documents');
+                    }
+                  : () => Get.toNamed(AppConstants.scannerRoute),
         );
       }
 
@@ -202,13 +206,73 @@ class DocumentsScreen extends GetView<DocumentsController> {
               child: DocumentCard(
                 document: doc,
                 onTap: () => controller.openDocument(doc),
-                onShare: () => controller.shareDocument(doc),
+                onShare: controller.showTrashOnly.value
+                    ? null
+                    : () => controller.shareDocument(doc),
                 onDelete: () => controller.deleteDocument(doc),
-                onFavorite: () => controller.toggleFavorite(doc),
-                onRename: () => controller.renameDocument(doc),
+                onFavorite: controller.showTrashOnly.value
+                    ? null
+                    : () => controller.toggleFavorite(doc),
+                onRename: controller.showTrashOnly.value
+                    ? null
+                    : () => controller.renameDocument(doc),
+                onRestore: controller.showTrashOnly.value
+                    ? () => controller.restoreDocument(doc)
+                    : null,
               ),
             );
           },
+        ),
+      );
+    });
+  }
+}
+
+class _FolderTabsBar extends GetView<DocumentsController>
+    implements PreferredSizeWidget {
+  _FolderTabsBar();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(48);
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.showFavoritesOnly.value ||
+          controller.showTrashOnly.value) {
+        return const SizedBox.shrink();
+      }
+
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+        child: Row(
+          children: AppConstants.defaultFolders.map((folder) {
+            final isSelected = controller.selectedFolder.value == folder;
+            return GestureDetector(
+              onTap: () => controller.setFolder(folder),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.white : Colors.white.withAlpha(30),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  folder,
+                  style: TextStyle(
+                    color: isSelected ? AppTheme.primaryColor : Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       );
     });

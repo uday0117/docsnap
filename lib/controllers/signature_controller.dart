@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:docsnap/services/ad_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as p;
@@ -12,6 +11,7 @@ import '../models/document_model.dart';
 import '../models/signature_model.dart';
 import '../repositories/document_repository.dart';
 import '../repositories/signature_repository.dart';
+import '../services/ad_service.dart';
 import '../services/pdf_service.dart';
 import '../services/share_service.dart';
 import '../utils/app_helpers.dart';
@@ -51,7 +51,7 @@ class SignatureController extends GetxController {
   }
 
   Future<void> saveSignature(Uint8List signatureBytes) async {
-    AppHelpers.showLoading('Saving signature...');
+    AppHelpers.showLoading('processing'.tr);
     try {
       final dir = await getApplicationDocumentsDirectory();
       final sigDir = Directory(p.join(dir.path, 'docsnap', 'signatures'));
@@ -70,39 +70,37 @@ class SignatureController extends GetxController {
 
       Get.dialog(
         AlertDialog(
-          title: const Text('Signature Saved'),
-          content: const Text(
-            'Support DocSnap by watching a short ad.',
-          ),
+          title: Text('signature_saved'.tr),
+          content: Text('watch_ad_subtitle'.tr),
           actions: [
             TextButton(
               onPressed: () {
                 Get.back();
-
                 if (targetDocument.value != null) {
                   _applySignatureToDocument(filePath);
                 }
               },
-              child: const Text('No Thanks'),
+              child: Text('no_thanks'.tr),
             ),
             ElevatedButton(
               onPressed: () async {
                 Get.back();
-
                 await _adService.showRewardedAdIfReady();
-
                 if (targetDocument.value != null) {
                   await _applySignatureToDocument(filePath);
                 }
               },
-              child: const Text('Watch Ad'),
+              child: Text('watch_ad'.tr),
             ),
           ],
         ),
       );
     } catch (e) {
       AppHelpers.hideLoading();
-      AppHelpers.showSnackbar('Failed to save: $e', isError: true);
+      AppHelpers.showSnackbar(
+        'failed_save'.trParams({'error': '$e'}),
+        isError: true,
+      );
     }
   }
 
@@ -120,16 +118,17 @@ class SignatureController extends GetxController {
     final doc = targetDocument.value;
     if (doc == null) return;
 
-    AppHelpers.showLoading('Applying signature to PDF...');
+    AppHelpers.showLoading('processing'.tr);
     try {
-      await _pdfService.applySignatureToPdf(
+      final result = await _pdfService.applySignatureToPdf(
         pdfPath: doc.pdfPath,
         pageImagePaths: doc.pageImagePaths,
         signatureImagePath: signaturePath,
       );
 
-      final newSize = await _pdfService.getPdfFileSize(doc.pdfPath);
+      final newSize = await _pdfService.getPdfFileSize(result.pdfPath);
       final updated = doc.copyWith(
+        pageImagePaths: result.pageImagePaths,
         sizeBytes: newSize,
         updatedAt: DateTime.now(),
       );
@@ -137,19 +136,22 @@ class SignatureController extends GetxController {
       targetDocument.value = updated;
 
       AppHelpers.hideLoading();
-      AppHelpers.showSnackbar('Signature applied to PDF!');
+      AppHelpers.showSnackbar('signature_applied'.tr);
       Get.back(result: updated);
     } catch (e) {
       AppHelpers.hideLoading();
-      AppHelpers.showSnackbar('Failed to apply signature: $e', isError: true);
+      AppHelpers.showSnackbar(
+        'failed_apply_signature'.trParams({'error': '$e'}),
+        isError: true,
+      );
     }
   }
 
   Future<void> deleteSignature(SignatureModel sig) async {
     final confirmed = await AppHelpers.showConfirmDialog(
-      title: 'Delete Signature',
-      message: 'Are you sure you want to delete this signature?',
-      confirmText: 'Delete',
+      title: 'delete_signature'.tr,
+      message: 'delete_signature_confirm'.tr,
+      confirmText: 'delete'.tr,
       isDestructive: true,
     );
     if (confirmed == true) {
@@ -177,7 +179,7 @@ class SignatureController extends GetxController {
   Future<void> shareSignature(SignatureModel sig) async {
     try {
       if (!File(sig.imagePath).existsSync()) {
-        AppHelpers.showSnackbar('Signature file not found', isError: true);
+        AppHelpers.showSnackbar('signature_not_found'.tr, isError: true);
         return;
       }
       await _shareService.shareFile(
@@ -185,7 +187,10 @@ class SignatureController extends GetxController {
         subject: 'My Signature - ${sig.name}',
       );
     } catch (e) {
-      AppHelpers.showSnackbar('Failed to share: $e', isError: true);
+      AppHelpers.showSnackbar(
+        'failed_to_share'.trParams({'error': '$e'}),
+        isError: true,
+      );
     }
   }
 }

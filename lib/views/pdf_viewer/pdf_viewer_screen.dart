@@ -7,6 +7,7 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart'
 
 import '../../controllers/pdf_viewer_controller.dart';
 import '../../themes/app_theme.dart';
+import '../../widgets/ad_banner_widget.dart';
 
 class PdfViewerScreen extends GetView<PdfViewerController> {
   const PdfViewerScreen({super.key});
@@ -15,43 +16,58 @@ class PdfViewerScreen extends GetView<PdfViewerController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: Obx(() {
-        if (controller.pdfPath.value.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final file = File(controller.pdfPath.value);
-        if (!file.existsSync()) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 56, color: Colors.red),
-                const SizedBox(height: 16),
-                Text('error'.tr),
-              ],
-            ),
-          );
-        }
-
-        return Column(
-          children: [
-            Expanded(
-              child: Obx(
-                () => SfPdfViewer.file(
-                  file,
-                  key: ValueKey(
-                    '${controller.pdfPath.value}_${controller.pdfReloadKey.value}',
+      body: Column(
+        children: [
+          Expanded(
+            child: Obx(() {
+              if (controller.pdfPath.value.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final file = File(controller.pdfPath.value);
+              if (!file.existsSync()) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 56, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text('error'.tr),
+                    ],
                   ),
-                  onPageChanged: (PdfPageChangedDetails details) {
-                    controller.updateCurrentPage(details.newPageNumber);
-                  },
-                ),
-              ),
-            ),
-            _buildPageIndicator(),
-          ],
-        );
-      }),
+                );
+              }
+
+              return Column(
+                children: [
+                  Expanded(
+                    child: Obx(
+                      () => SfPdfViewer.file(
+                        file,
+                        key: ValueKey(
+                          '${controller.pdfPath.value}_${controller.pdfReloadKey.value}',
+                        ),
+                        password: controller.pdfPassword.value.isEmpty
+                            ? null
+                            : controller.pdfPassword.value,
+                        onPageChanged: (PdfPageChangedDetails details) {
+                          controller.updateCurrentPage(details.newPageNumber);
+                        },
+                        onDocumentLoadFailed: (details) {
+                          if (controller.needsPassword.value) {
+                            controller.promptForPassword();
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  _buildPageIndicator(),
+                ],
+              );
+            }),
+          ),
+          const AdBannerWidget(),
+        ],
+      ),
     );
   }
 
@@ -73,6 +89,11 @@ class PdfViewerScreen extends GetView<PdfViewerController> {
           onPressed: controller.shareDocument,
         ),
         IconButton(
+          icon: const Icon(Icons.print_rounded),
+          onPressed: controller.printDocument,
+          tooltip: 'print'.tr,
+        ),
+        IconButton(
           icon: const Icon(Icons.draw_rounded),
           onPressed: controller.openSignature,
           tooltip: 'signature'.tr,
@@ -83,9 +104,26 @@ class PdfViewerScreen extends GetView<PdfViewerController> {
             borderRadius: BorderRadius.circular(12),
           ),
           onSelected: (value) {
-            if (value == 'rename') controller.renameDocument();
+            switch (value) {
+              case 'rename':
+                controller.renameDocument();
+                break;
+              case 'print':
+                controller.printDocument();
+                break;
+            }
           },
           itemBuilder: (_) => [
+            PopupMenuItem(
+              value: 'print',
+              child: Row(
+                children: [
+                  const Icon(Icons.print_rounded, size: 18),
+                  const SizedBox(width: 12),
+                  Text('print'.tr),
+                ],
+              ),
+            ),
             PopupMenuItem(
               value: 'rename',
               child: Row(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/crop_editor_controller.dart';
+import '../../themes/app_theme.dart';
 import '../../widgets/app_button.dart';
 
 class CropEditorScreen extends StatelessWidget {
@@ -116,7 +117,7 @@ class CropEditorScreen extends StatelessWidget {
                     icon: Icons.skip_next_rounded,
                     onPressed:
                         ctrl.isProcessing.value ? null : ctrl.skipAndAddPage,
-                    color: Colors.orange,
+                    color: AppTheme.primaryLight,
                   ),
                 ),
               ),

@@ -16,39 +16,34 @@ class SignatureScreen extends GetView<SignatureController> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        appBar: GradientAppBar(
-          titleWidget: Obx(
-            () => Text(
-              controller.targetDocument.value != null
-                  ? 'Sign PDF'
-                  : 'Signature',
-            ),
-          ),
-          actions: const [],
-        ),
-        body: Column(
-          children: [
-            const TabBar(
-              indicatorColor: AppTheme.primaryColor,
-              labelColor: AppTheme.primaryColor,
-              unselectedLabelColor: Colors.grey,
-              tabs: [
-                Tab(text: 'Draw Signature'),
-                Tab(text: 'Saved Signatures'),
+      child: Obx(
+        () => Scaffold(
+          appBar: GradientAppBar(
+            title: controller.targetDocument.value != null
+                ? 'Sign PDF'
+                : 'Signature',
+            subtitle: controller.targetDocument.value?.name,
+            bottom: TabBar(
+              indicatorColor: Colors.white,
+              indicatorWeight: 3,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white60,
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+              tabs: const [
+                Tab(text: 'Draw'),
+                Tab(text: 'Saved'),
               ],
             ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _DrawSignatureTab(
-                    signatureCtrl: controller,
-                  ),
-                  _SavedSignaturesTab(ctrl: controller),
-                ],
-              ),
-            ),
-          ],
+          ),
+          body: TabBarView(
+            children: [
+              _DrawSignatureTab(signatureCtrl: controller),
+              _SavedSignaturesTab(ctrl: controller),
+            ],
+          ),
         ),
       ),
     );
@@ -109,7 +104,38 @@ class _DrawSignatureTabState extends State<_DrawSignatureTab> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          const SizedBox(height: 12),
+          Obx(() {
+            final doc = widget.signatureCtrl.targetDocument.value;
+            if (doc == null) return const SizedBox.shrink();
+            return Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withAlpha(18),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.primaryColor.withAlpha(40)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.picture_as_pdf_rounded,
+                      color: AppTheme.primaryColor, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Signing: ${doc.name}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
           _buildStrokeOptions(context),
           const SizedBox(height: 16),
           Expanded(
@@ -197,7 +223,7 @@ class _DrawSignatureTabState extends State<_DrawSignatureTab> {
         Row(
           children: [
             Text('stroke_width'.tr,
-                style: TextStyle(fontWeight: FontWeight.w500)),
+                style: const TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(width: 12),
             Expanded(
               child: Obx(
@@ -360,7 +386,7 @@ class _SavedSignaturesTab extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'no_signatures'.tr,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: Colors.grey,
@@ -370,7 +396,7 @@ class _SavedSignaturesTab extends StatelessWidget {
               Text(
                 'draw_signature_to_save'.tr,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
+                style: const TextStyle(color: Colors.grey),
               ),
             ],
           ),
@@ -465,7 +491,7 @@ class _SignatureCard extends StatelessWidget {
                     child: Container(
                       width: 24,
                       height: 24,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: AppTheme.primaryColor,
                         shape: BoxShape.circle,
                       ),

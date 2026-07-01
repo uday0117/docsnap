@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../themes/app_theme.dart';
 
@@ -18,35 +19,35 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
-          ),
-          if (actionLabel != null)
-            TextButton(
-              onPressed: onAction,
-              style: TextButton.styleFrom(
-                textStyle: const TextStyle(
-                  inherit: false,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+        if (actionLabel != null)
+          TextButton(
+            onPressed: onAction,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              textStyle: const TextStyle(
+                inherit: false,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
               ),
-              child: Text(actionLabel!),
             ),
-        ],
-      ),
+            child: Text(actionLabel!),
+          ),
+      ],
     );
   }
 }
@@ -54,32 +55,191 @@ class SectionHeader extends StatelessWidget {
 class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final Widget? titleWidget;
+  final String? subtitle;
   final List<Widget>? actions;
   final bool showBack;
   final Widget? leading;
+  final PreferredSizeWidget? bottom;
 
   const GradientAppBar({
     super.key,
     this.title,
     this.titleWidget,
+    this.subtitle,
     this.actions,
     this.showBack = true,
     this.leading,
+    this.bottom,
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(56);
+  Size get preferredSize {
+    final bottomHeight = bottom?.preferredSize.height ?? 0;
+    return Size.fromHeight(kToolbarHeight + bottomHeight + (subtitle != null ? 8 : 0));
+  }
 
   @override
   Widget build(BuildContext context) {
+    Widget? titleContent = titleWidget;
+    if (titleContent == null && title != null) {
+      if (subtitle != null && subtitle!.isNotEmpty) {
+        titleContent = Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              subtitle!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        );
+      } else {
+        titleContent = Text(
+          title!,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        );
+      }
+    }
+
     return AppBar(
-      title: titleWidget ?? Text(title ?? ''),
-      backgroundColor: AppTheme.primaryColor,
+      title: titleContent,
+      centerTitle: false,
+      titleSpacing: showBack ? 0 : 16,
+      backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
-      centerTitle: true,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      automaticallyImplyLeading: false,
+      leading: leading ??
+          (showBack && Navigator.canPop(context)
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  onPressed: () => Get.back(),
+                )
+              : null),
       actions: actions,
+      bottom: bottom,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          color: AppTheme.primaryColor,
+        ),
+      ),
     );
   }
+}
+
+/// Pill-style tabs for gradient app bars. Works with [TabController] and
+/// rebuilds correctly when the selected tab changes.
+class AppSegmentedTabs extends StatelessWidget {
+  final TabController controller;
+  final List<AppSegmentedTabItem> tabs;
+
+  const AppSegmentedTabs({
+    super.key,
+    required this.controller,
+    required this.tabs,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        return Container(
+          margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.black.withAlpha(45),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withAlpha(35)),
+          ),
+          child: Row(
+            children: List.generate(tabs.length, (index) {
+              final selected = controller.index == index;
+              final tab = tabs[index];
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => controller.animateTo(index),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: selected ? Colors.white : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: selected
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(40),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          tab.icon,
+                          size: 18,
+                          color: selected
+                              ? AppTheme.primaryColor
+                              : Colors.white.withAlpha(210),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          tab.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight:
+                                selected ? FontWeight.w800 : FontWeight.w500,
+                            color: selected
+                                ? AppTheme.primaryColor
+                                : Colors.white.withAlpha(210),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class AppSegmentedTabItem {
+  final IconData icon;
+  final String label;
+
+  const AppSegmentedTabItem({
+    required this.icon,
+    required this.label,
+  });
 }
 
 class LoadingOverlay extends StatelessWidget {
@@ -96,6 +256,8 @@ class LoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Stack(
       children: [
         child,
@@ -106,7 +268,7 @@ class LoadingOverlay extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(

@@ -1,16 +1,103 @@
-# docsnap
+# DocSnap
 
-A new Flutter project.
+**DocSnap** is a production-ready Flutter document scanner and PDF manager — scan, enhance, OCR, sign, merge, and share documents with all core features free.
+
+## Features
+
+### Document Scanner
+- Auto edge detection & manual crop
+- Multi-page & batch scanning
+- Smart scan modes: Document, Receipt, Passport, ID Card, Business Card, Book, Whiteboard
+- Camera flash, gallery import, page reorder/delete
+
+### Image Enhancement
+- Filters: Original, Auto Enhance, Magic Color, B&W, Grayscale, Color, Document, Receipt
+- Adjustments: Brightness, Contrast, Saturation, Sharpness
+
+### PDF Tools
+- Generate, merge, split, compress PDFs
+- Watermark, digital signature
+- Export quality: Low / Medium / High
+
+### OCR
+- Image & document text extraction (Google ML Kit)
+- Copy, search, multi-language support
+
+### Organization
+- Folders, favorites, pinned documents
+- Search by filename, OCR text, tags
+- Soft-delete trash with restore
+
+### More
+- QR & barcode scanner
+- Dark / light theme
+- Firebase Analytics & Crashlytics
+- Google Mobile Ads (non-intrusive — never during scanning)
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | Flutter (stable) |
+| State / DI | GetX |
+| Architecture | MVVM + Clean Architecture |
+| Storage | GetStorage (local JSON persistence) |
+| PDF | `pdf` package |
+| Image | `image` package |
+| OCR | Google ML Kit |
+| Camera | `camera` |
+| Edge detection | Custom OpenCV-style algorithm |
+| Ads | Google Mobile Ads |
+| Analytics | Firebase Analytics + Crashlytics |
+
+## Project Structure
+
+```
+lib/
+├── core/           # Config, crashlytics
+├── bindings/       # GetX dependency injection
+├── controllers/    # ViewModels (business logic)
+├── models/         # Data models
+├── repositories/   # Data access layer
+├── routes/         # Navigation
+├── services/       # PDF, image, OCR, ads, analytics
+├── themes/         # Material 3 theming
+├── translations/   # i18n (10 languages)
+├── utils/          # Constants, helpers
+├── views/          # UI screens
+└── widgets/        # Reusable components
+```
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+```bash
+flutter pub get
+flutter run
+```
 
-A few resources to get you started if this is your first Flutter project:
+### Firebase (Android)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Add `google-services.json` to `android/app/`
+2. Enable Analytics and Crashlytics in Firebase Console
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Build release
+
+```bash
+flutter build apk --release
+flutter build appbundle --release
+```
+
+## Architecture
+
+```
+View (Screen) → Controller (GetX) → Repository → Service / Storage
+```
+
+- **Views**: Material 3 UI only
+- **Controllers**: State, user actions, orchestration
+- **Repositories**: Document & signature persistence
+- **Services**: PDF generation, image processing, OCR, ads, analytics
+
+## License
+
+© UK Solutions. All rights reserved.

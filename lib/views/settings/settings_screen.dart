@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../controllers/settings_controller.dart';
+import '../../services/ad_service.dart';
 import '../../themes/app_theme.dart';
 import '../../utils/app_constants.dart';
 import '../../utils/app_helpers.dart';
+import '../../utils/app_theme_mode.dart';
 import '../../widgets/common_widgets.dart';
 
 class SettingsScreen extends GetView<SettingsController> {
@@ -19,21 +22,30 @@ class SettingsScreen extends GetView<SettingsController> {
         () => ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            _buildSectionTitle(context, 'support_docsnap'.tr),
+            _buildSettingsCard([
+              _buildActionTile(
+                icon: Icons.play_circle_outline_rounded,
+                iconColor: Colors.deepOrange,
+                title: 'watch_ad_support'.tr,
+                subtitle: 'watch_ad_subtitle'.tr,
+                onTap: () async {
+                  AppHelpers.showLoading('loading_ad'.tr);
+                  try {
+                    await Get.find<AdService>().showRewardedAdIfReady();
+                  } finally {
+                    AppHelpers.hideLoading();
+                  }
+                },
+              ),
+            ]),
+            const SizedBox(height: 16),
             _buildSectionTitle(context, 'language'.tr),
             _buildSettingsCard([
               ListTile(
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                leading: Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withAlpha(26),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.language_rounded,
-                      color: Colors.blue, size: 20),
-                ),
+                leading: _iconBox(Icons.language_rounded, Colors.blue),
                 title: Text('app_language'.tr,
                     style: const TextStyle(fontWeight: FontWeight.w500)),
                 subtitle: Text(
@@ -45,15 +57,11 @@ class SettingsScreen extends GetView<SettingsController> {
                   underline: const SizedBox.shrink(),
                   borderRadius: BorderRadius.circular(12),
                   items: AppConstants.languages
-                      .map(
-                        (lang) => DropdownMenuItem(
-                          value: lang,
-                          child: Text(
-                            lang,
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      )
+                      .map((lang) => DropdownMenuItem(
+                            value: lang,
+                            child: Text(lang,
+                                style: const TextStyle(fontSize: 13)),
+                          ))
                       .toList(),
                   onChanged: (v) {
                     if (v != null) controller.setLanguage(v);
@@ -62,37 +70,133 @@ class SettingsScreen extends GetView<SettingsController> {
               ),
             ]),
             const SizedBox(height: 16),
-            _buildSectionTitle(context, 'Appearance'),
+            _buildSectionTitle(context, 'appearance'.tr),
             _buildSettingsCard([
-              SwitchListTile(
+              ListTile(
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                secondary: Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: Colors.indigo.withAlpha(26),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    controller.isDarkMode
-                        ? Icons.dark_mode_rounded
-                        : Icons.light_mode_rounded,
-                    color: Colors.indigo,
-                    size: 20,
-                  ),
+                leading: _iconBox(
+                  switch (controller.themeMode) {
+                    AppThemeMode.dark => Icons.dark_mode_rounded,
+                    AppThemeMode.system => Icons.brightness_auto_rounded,
+                    AppThemeMode.light => Icons.light_mode_rounded,
+                  },
+                  Colors.indigo,
                 ),
-                title: const Text(
-                  'Dark Mode',
-                  style: TextStyle(fontWeight: FontWeight.w500),
+                title: Text('theme_mode'.tr,
+                    style: const TextStyle(fontWeight: FontWeight.w500)),
+                subtitle: Text('theme_mode_subtitle'.tr,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                trailing: DropdownButton<AppThemeMode>(
+                  value: controller.themeMode,
+                  underline: const SizedBox.shrink(),
+                  borderRadius: BorderRadius.circular(12),
+                  items: AppThemeMode.values
+                      .map(
+                        (mode) => DropdownMenuItem(
+                          value: mode,
+                          child: Text(
+                            _themeModeLabel(mode),
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (mode) {
+                    if (mode != null) controller.setThemeMode(mode);
+                  },
                 ),
-                subtitle: const Text(
-                  'Switch between light and dark theme',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ]),
+            const SizedBox(height: 16),
+            _buildSectionTitle(context, 'cloud_backup'.tr),
+            _buildSettingsCard([
+              _buildActionTile(
+                icon: Icons.cloud_upload_rounded,
+                iconColor: Colors.lightBlue,
+                title: 'cloud_backup'.tr,
+                subtitle: 'cloud_backup_subtitle'.tr,
+                onTap: () => Get.toNamed(AppConstants.cloudBackupRoute),
+              ),
+            ]),
+            const SizedBox(height: 16),
+            _buildSectionTitle(context, 'scanning_defaults'.tr),
+            _buildSettingsCard([
+              _buildActionTile(
+                icon: Icons.filter_rounded,
+                iconColor: Colors.purple,
+                title: 'default_filter'.tr,
+                trailing: DropdownButton<String>(
+                  value: controller.defaultFilter,
+                  underline: const SizedBox.shrink(),
+                  borderRadius: BorderRadius.circular(12),
+                  items: AppConstants.filters
+                      .map((f) => DropdownMenuItem(
+                            value: f,
+                            child:
+                                Text(f, style: const TextStyle(fontSize: 13)),
+                          ))
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) controller.setDefaultFilter(v);
+                  },
                 ),
-                value: controller.isDarkMode,
-                activeThumbColor: AppTheme.primaryColor,
-                onChanged: controller.toggleDarkMode,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildActionTile(
+                icon: Icons.high_quality_rounded,
+                iconColor: Colors.teal,
+                title: 'default_pdf_quality'.tr,
+                trailing: DropdownButton<String>(
+                  value: controller.defaultQuality,
+                  underline: const SizedBox.shrink(),
+                  borderRadius: BorderRadius.circular(12),
+                  items: AppConstants.pdfQualities
+                      .map((q) => DropdownMenuItem(
+                            value: q,
+                            child:
+                                Text(q, style: const TextStyle(fontSize: 13)),
+                          ))
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) controller.setDefaultQuality(v);
+                  },
+                ),
+              ),
+            ]),
+            const SizedBox(height: 16),
+            _buildSectionTitle(context, 'share_support'.tr),
+            _buildSettingsCard([
+              _buildActionTile(
+                icon: Icons.star_rate_rounded,
+                iconColor: Colors.amber,
+                title: 'rate_app'.tr,
+                onTap: () async {
+                  final url = Uri.parse(AppConstants.rateAppUrl);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildActionTile(
+                icon: Icons.share_rounded,
+                iconColor: Colors.green,
+                title: 'share_app'.tr,
+                onTap: () {
+                  Share.share(
+                    'share_app_message'
+                        .trParams({'url': AppConstants.rateAppUrl}),
+                    subject: 'share_app_subject'.tr,
+                  );
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildActionTile(
+                icon: Icons.mail_outline_rounded,
+                iconColor: Colors.blue,
+                title: 'contact_support'.tr,
+                onTap: _contactSupport,
               ),
             ]),
             const SizedBox(height: 16),
@@ -102,63 +206,34 @@ class SettingsScreen extends GetView<SettingsController> {
                 icon: Icons.privacy_tip_outlined,
                 iconColor: Colors.teal,
                 title: 'privacy_policy'.tr,
-                onTap: () async {
-                  final url = Uri.parse(AppConstants.privacyPolicyUrl);
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  } else {
-                    Get.snackbar(
-                      'error'.tr,
-                      'could_not_open_privacy_policy'.tr,
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  }
-                },
+                onTap: () => _launchUrl(AppConstants.privacyPolicyUrl),
               ),
               const Divider(height: 1, indent: 56),
               _buildActionTile(
                 icon: Icons.description_outlined,
                 iconColor: Colors.blue,
                 title: 'terms_and_conditions'.tr,
-                onTap: () async {
-                  final url = Uri.parse(AppConstants.termsUrl);
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  } else {
-                    Get.snackbar(
-                      'error'.tr,
-                      'could_not_open_terms'.tr,
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  }
-                },
-              ),
-              const Divider(height: 1, indent: 56),
-              _buildActionTile(
-                icon: Icons.star_rate_rounded,
-                iconColor: Colors.amber,
-                title: 'rate_app'.tr,
-                onTap: () async {
-                  final url = Uri.parse(AppConstants.rateAppUrl);
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  } else {
-                    Get.snackbar(
-                      'error'.tr,
-                      'could_not_open_store'.tr,
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  }
-                },
+                onTap: () => _launchUrl(AppConstants.termsUrl),
               ),
               const Divider(height: 1, indent: 56),
               _buildActionTile(
                 icon: Icons.info_outline_rounded,
                 iconColor: AppTheme.primaryColor,
                 title: 'app_version'.tr,
-                trailing: Text(
-                  AppConstants.appVersion,
-                  style: const TextStyle(color: Colors.grey),
+                trailing: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor.withAlpha(20),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'v${AppConstants.appVersion}',
+                    style: TextStyle(
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12),
+                  ),
                 ),
               ),
             ]),
@@ -175,16 +250,34 @@ class SettingsScreen extends GetView<SettingsController> {
             ]),
             const SizedBox(height: 40),
             Center(
-              child: Text(
-                '${AppConstants.appName} v${AppConstants.appVersion}\n© 2024 UK Solutions',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
+              child: Column(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor.withAlpha(20),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(Icons.document_scanner_rounded,
+                        color: AppTheme.primaryColor, size: 30),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    '${AppConstants.appName} v${AppConstants.appVersion}',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 14),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'copyright_notice'.tr,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -213,10 +306,23 @@ class SettingsScreen extends GetView<SettingsController> {
     );
   }
 
+  Widget _iconBox(IconData icon, Color color) {
+    return Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        color: color.withAlpha(26),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(icon, color: color, size: 20),
+    );
+  }
+
   Widget _buildActionTile({
     required IconData icon,
     required Color iconColor,
     required String title,
+    String? subtitle,
     Color? titleColor,
     VoidCallback? onTap,
     Widget? trailing,
@@ -224,15 +330,7 @@ class SettingsScreen extends GetView<SettingsController> {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       onTap: onTap,
-      leading: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: iconColor.withAlpha(26),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: iconColor, size: 20),
-      ),
+      leading: _iconBox(icon, iconColor),
       title: Text(
         title,
         style: TextStyle(
@@ -240,6 +338,10 @@ class SettingsScreen extends GetView<SettingsController> {
           color: titleColor,
         ),
       ),
+      subtitle: subtitle != null
+          ? Text(subtitle,
+              style: const TextStyle(fontSize: 12, color: Colors.grey))
+          : null,
       trailing: trailing ??
           (onTap != null
               ? const Icon(Icons.chevron_right, color: Colors.grey)
@@ -247,44 +349,80 @@ class SettingsScreen extends GetView<SettingsController> {
     );
   }
 
+  String _themeModeLabel(AppThemeMode mode) {
+    switch (mode) {
+      case AppThemeMode.light:
+        return 'theme_light'.tr;
+      case AppThemeMode.dark:
+        return 'theme_dark'.tr;
+      case AppThemeMode.system:
+        return 'theme_system'.tr;
+    }
+  }
+
+  Future<void> _contactSupport() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'apps.uksolutions@gmail.com',
+      queryParameters: {
+        'subject': 'DocSnap Support',
+        'body': 'App Version: ${AppConstants.appVersion}',
+      },
+    );
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        AppHelpers.showSnackbar('could_not_open_email'.tr, isError: true);
+      }
+    } catch (_) {
+      AppHelpers.showSnackbar('could_not_open_email'.tr, isError: true);
+    }
+  }
+
+  Future<void> _launchUrl(String urlStr) async {
+    final url = Uri.parse(urlStr);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      AppHelpers.showSnackbar('could_not_open_link'.tr, isError: true);
+    }
+  }
+
   void _confirmClearData() async {
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Clear All Data'),
-        content: const Text(
-          'This will delete all your documents, signatures and settings. This action cannot be undone.',
-        ),
+        title: Text('clear_all_data_title'.tr),
+        content: Text('clear_all_confirm'.tr),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr),
           ),
           ElevatedButton(
             onPressed: () => Get.back(result: true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Clear All'),
+            child: Text('clear_all_button'.tr,
+                style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
     if (confirmed == true) {
-      AppHelpers.showLoading('Clearing data...');
+      AppHelpers.showLoading('clearing_data'.tr);
       try {
         await controller.clearAllData();
         AppHelpers.hideLoading();
-        Get.offAllNamed(AppConstants.homeRoute);
-        Get.snackbar(
-          'Cleared',
-          'All data has been cleared.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        Get.offAllNamed(AppConstants.splashRoute);
+        AppHelpers.showSnackbar('all_data_cleared'.tr, title: 'cleared'.tr);
       } catch (e) {
         AppHelpers.hideLoading();
-        Get.snackbar(
-          'error'.tr,
-          'Failed to clear data: $e',
-          snackPosition: SnackPosition.BOTTOM,
+        AppHelpers.showSnackbar(
+          'failed_clear_data'.trParams({'error': '$e'}),
+          isError: true,
         );
       }
     }

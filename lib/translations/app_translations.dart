@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import 'translation_extensions.dart';
+
 class AppTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
@@ -103,6 +105,7 @@ class AppTranslations extends Translations {
           'could_not_open_store': 'Could not open App Store',
           'success': 'Success',
           'warning': 'Warning',
+          ...TranslationExtensions.enUs,
         },
         'es_ES': {
           // Home Screen
@@ -207,6 +210,7 @@ class AppTranslations extends Translations {
           'could_not_open_store': 'No se pudo abrir la Tienda de Aplicaciones',
           'success': 'Éxito',
           'warning': 'Advertencia',
+          ...TranslationExtensions.esEs,
         },
         'fr_FR': {
           // Home Screen
@@ -311,6 +315,7 @@ class AppTranslations extends Translations {
           'could_not_open_store': 'Impossible d\'ouvrir l\'App Store',
           'success': 'Succès',
           'warning': 'Avertissement',
+          ...TranslationExtensions.frFr,
         },
         'de_DE': {
           // Home Screen
@@ -415,6 +420,7 @@ class AppTranslations extends Translations {
           'could_not_open_store': 'App Store konnte nicht geöffnet werden',
           'success': 'Erfolg',
           'warning': 'Warnung',
+          ...TranslationExtensions.deDe,
         },
         'it_IT': {
           // Home Screen
@@ -518,6 +524,7 @@ class AppTranslations extends Translations {
           'could_not_open_store': 'Impossibile aprire l\'App Store',
           'success': 'Successo',
           'warning': 'Avviso',
+          ...TranslationExtensions.itIt,
         },
         'pt_PT': {
           // Home Screen
@@ -622,6 +629,7 @@ class AppTranslations extends Translations {
           'could_not_open_store': 'Não foi possível abrir a App Store',
           'success': 'Sucesso',
           'warning': 'Aviso',
+          ...TranslationExtensions.ptPt,
         },
         'ar_SA': {
           // Home Screen
@@ -723,6 +731,7 @@ class AppTranslations extends Translations {
           'could_not_open_store': 'لا يمكن فتح متجر التطبيقات',
           'success': 'نجاح',
           'warning': 'تحذير',
+          ...TranslationExtensions.arSa,
         },
         'zh_CN': {
           // Home Screen
@@ -824,6 +833,7 @@ class AppTranslations extends Translations {
           'could_not_open_store': '无法打开应用商店',
           'success': '成功',
           'warning': '警告',
+          ...TranslationExtensions.zhCn,
         },
         'ja_JP': {
           // Home Screen
@@ -925,6 +935,7 @@ class AppTranslations extends Translations {
           'could_not_open_store': 'アプリストアを開けませんでした',
           'success': '成功',
           'warning': '警告',
+          ...TranslationExtensions.jaJp,
         },
         'hi_IN': {
           // Home Screen
@@ -1027,6 +1038,7 @@ class AppTranslations extends Translations {
           'could_not_open_store': 'ऐप स्टोर नहीं खोला जा सका',
           'success': 'सफलता',
           'warning': 'चेतावनी',
+          ...TranslationExtensions.hiIn,
         },
       };
 }

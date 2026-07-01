@@ -4,17 +4,20 @@ import 'package:image_cropper/image_cropper.dart';
 
 import '../models/scanned_page.dart';
 import '../services/image_processing_service.dart';
+import '../themes/app_theme.dart';
 import '../utils/app_constants.dart';
 import '../utils/app_helpers.dart';
+import '../utils/scan_mode.dart';
 import 'scanner_controller.dart';
 
 class CropEditorController extends GetxController {
   final _imageService = Get.find<ImageProcessingService>();
 
   final RxString imagePath = ''.obs;
-  final RxDouble rotation = 0.0.obs;
   final RxBool isProcessing = false.obs;
   dynamic scannerController;
+  ScanMode scanMode = ScanMode.document;
+  IdCardSide idCardSide = IdCardSide.front;
 
   @override
   void onInit() {
@@ -23,6 +26,10 @@ class CropEditorController extends GetxController {
     if (args != null) {
       imagePath.value = args['imagePath'] as String? ?? '';
       scannerController = args['scannerController'];
+      final mode = args['scanMode'] as String?;
+      if (mode == 'idCard') scanMode = ScanMode.idCard;
+      final side = args['idCardSide'] as String?;
+      if (side == 'back') idCardSide = IdCardSide.back;
     }
   }
 
@@ -30,28 +37,38 @@ class CropEditorController extends GetxController {
     if (imagePath.value.isEmpty) return;
     isProcessing.value = true;
     try {
+      final lockRatio = scanMode.isIdCard;
       final cropped = await ImageCropper().cropImage(
         sourcePath: imagePath.value,
+        aspectRatio: lockRatio
+            ? CropAspectRatio(
+                ratioX: AppConstants.idCardAspectRatio * 100,
+                ratioY: 100,
+              )
+            : null,
         uiSettings: [
           AndroidUiSettings(
-            toolbarTitle: 'Crop Document',
-            toolbarColor: const Color(0xFF1565C0),
+            toolbarTitle: 'crop_document'.tr,
+            toolbarColor: AppTheme.primaryColor,
             toolbarWidgetColor: Colors.white,
-            statusBarColor: const Color(0xFF0D47A1),
+            statusBarLight: false,
             backgroundColor: Colors.black,
-            initAspectRatio: CropAspectRatioPreset.original,
-            lockAspectRatio: false,
+            initAspectRatio: lockRatio
+                ? CropAspectRatioPreset.ratio16x9
+                : CropAspectRatioPreset.original,
+            lockAspectRatio: lockRatio,
             hideBottomControls: false,
             showCropGrid: true,
             cropFrameColor: Colors.white,
             cropGridColor: Colors.white54,
           ),
           IOSUiSettings(
-            title: 'Crop Document',
-            cancelButtonTitle: 'Cancel',
-            doneButtonTitle: 'Done',
+            title: 'crop_document'.tr,
+            cancelButtonTitle: 'cancel'.tr,
+            doneButtonTitle: 'done'.tr,
             hidesNavigationBar: false,
-            minimumAspectRatio: 0.5,
+            minimumAspectRatio: lockRatio ? 1.0 : 0.5,
+            aspectRatioLockEnabled: lockRatio,
           ),
         ],
       );
@@ -63,25 +80,16 @@ class CropEditorController extends GetxController {
     }
   }
 
-  Future<void> rotateLeft() async {
-    rotation.value = (rotation.value - 90) % 360;
-    await _applyRotation();
-  }
+  Future<void> rotateLeft() async => _rotateBy(-90);
 
-  Future<void> rotateRight() async {
-    rotation.value = (rotation.value + 90) % 360;
-    await _applyRotation();
-  }
+  Future<void> rotateRight() async => _rotateBy(90);
 
-  Future<void> _applyRotation() async {
+  Future<void> _rotateBy(double degrees) async {
     if (imagePath.value.isEmpty) return;
     isProcessing.value = true;
     try {
-      final rotated = await _imageService.rotateImage(
-        imagePath.value,
-        rotation.value == 0 ? 90 : rotation.value,
-      );
-      imagePath.value = rotated;
+      imagePath.value =
+          await _imageService.rotateImage(imagePath.value, degrees);
     } finally {
       isProcessing.value = false;
     }
@@ -103,7 +111,7 @@ class CropEditorController extends GetxController {
 
   Future<void> applyAndAddPage() async {
     if (imagePath.value.isEmpty) {
-      AppHelpers.showSnackbar('No image to process', isError: true);
+      AppHelpers.showSnackbar('no_image_process'.tr, isError: true);
       return;
     }
 
@@ -112,7 +120,6 @@ class CropEditorController extends GetxController {
     try {
       final page = ScannedPage(imagePath: imagePath.value);
 
-      // Try to find scanner controller
       dynamic scanner = scannerController;
       if (scanner == null) {
         try {
@@ -124,12 +131,15 @@ class CropEditorController extends GetxController {
       }
 
       scanner.addScannedPage(page);
-      Get.back();
+      Get.back(result: 'added');
       await Future.delayed(const Duration(milliseconds: 100));
-      AppHelpers.showSnackbar('Page added!');
+      AppHelpers.showSnackbar('page_added'.tr);
     } catch (e) {
       Get.back();
-      AppHelpers.showSnackbar('Error: $e', isError: true);
+      AppHelpers.showSnackbar(
+        'failed_generic'.trParams({'error': '$e'}),
+        isError: true,
+      );
     } finally {
       isProcessing.value = false;
     }
@@ -139,7 +149,6 @@ class CropEditorController extends GetxController {
     Get.back(result: 'cancelled');
   }
 
-  // Quick add without any adjustments
   Future<void> skipAndAddPage() async {
     if (imagePath.value.isEmpty) return;
 
@@ -151,13 +160,16 @@ class CropEditorController extends GetxController {
       if (scannerController != null) {
         await Future.delayed(const Duration(milliseconds: 50));
         scannerController.addScannedPage(page);
-        AppHelpers.showSnackbar('Page added!');
+        AppHelpers.showSnackbar('page_added'.tr);
         Get.back(result: 'added');
       } else {
         Get.back(result: page);
       }
     } catch (e) {
-      AppHelpers.showSnackbar('Error: $e', isError: true);
+      AppHelpers.showSnackbar(
+        'failed_generic'.trParams({'error': '$e'}),
+        isError: true,
+      );
       isProcessing.value = false;
     }
   }

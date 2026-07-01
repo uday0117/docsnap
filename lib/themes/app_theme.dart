@@ -4,10 +4,11 @@ import 'package:flutter/services.dart';
 class AppTheme {
   AppTheme._();
 
-  static const Color primaryColor = Color(0xFF1565C0);
-  static const Color primaryLight = Color(0xFF1E88E5);
-  static const Color primaryDark = Color(0xFF0D47A1);
-  static const Color accentColor = Color(0xFF00BCD4);
+  // CamScanner-inspired teal palette
+  static const Color primaryColor = Color(0xFF00B894);
+  static const Color primaryLight = Color(0xFF26D9B8);
+  static const Color primaryDark = Color(0xFF009E7E);
+  static const Color accentColor = Color(0xFFFF9F43);
   static const Color successColor = Color(0xFF43A047);
   static const Color errorColor = Color(0xFFE53935);
   static const Color warningColor = Color(0xFFFB8C00);
@@ -19,14 +20,14 @@ class AppTheme {
       primary: primaryColor,
       secondary: accentColor,
       error: errorColor,
-      surface: const Color(0xFFF5F7FA),
+      surface: const Color(0xFFF7F8FA),
     );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
       brightness: Brightness.light,
-      scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+      scaffoldBackgroundColor: const Color(0xFFF7F8FA),
       appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: true,
@@ -113,6 +114,19 @@ class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        height: 64,
+        backgroundColor: Colors.white,
+        indicatorColor: primaryColor.withAlpha(26),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 11,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? primaryColor : Colors.grey,
+          );
+        }),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
@@ -221,6 +235,19 @@ class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        height: 64,
+        backgroundColor: const Color(0xFF1A1A2E),
+        indicatorColor: primaryLight.withAlpha(40),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 11,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? primaryLight : Colors.grey,
+          );
+        }),
       ),
     );
   }

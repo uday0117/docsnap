@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../models/document_model.dart';
 import '../themes/app_theme.dart';
@@ -13,6 +14,7 @@ class DocumentCard extends StatelessWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onFavorite;
   final VoidCallback? onRename;
+  final VoidCallback? onRestore;
 
   const DocumentCard({
     super.key,
@@ -22,6 +24,7 @@ class DocumentCard extends StatelessWidget {
     this.onDelete,
     this.onFavorite,
     this.onRename,
+    this.onRestore,
   });
 
   @override
@@ -64,7 +67,11 @@ class DocumentCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
-                            '${document.pageCount} ${document.pageCount == 1 ? 'page' : 'pages'}',
+                            document.pageCount == 1
+                                ? 'page_count_one'.trParams(
+                                    {'count': '${document.pageCount}'})
+                                : 'pages_count'.trParams(
+                                    {'count': '${document.pageCount}'}),
                             style: theme.textTheme.bodySmall,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -121,21 +128,34 @@ class DocumentCard extends StatelessWidget {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    icon: Icon(
-                      document.isFavorite
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      size: 20,
-                      color: document.isFavorite ? Colors.red : Colors.grey,
+                  if (onFavorite != null)
+                    IconButton(
+                      icon: Icon(
+                        document.isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        size: 20,
+                        color: document.isFavorite ? Colors.red : Colors.grey,
+                      ),
+                      onPressed: onFavorite,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                     ),
-                    onPressed: onFavorite,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
+                  if (onRestore != null)
+                    IconButton(
+                      icon: const Icon(Icons.restore_from_trash_rounded,
+                          size: 20, color: AppTheme.primaryColor),
+                      tooltip: 'restore'.tr,
+                      onPressed: onRestore,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                     ),
-                  ),
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert, size: 20),
                     shape: RoundedRectangleBorder(
@@ -149,40 +169,58 @@ class DocumentCard extends StatelessWidget {
                         case 'rename':
                           onRename?.call();
                           break;
+                        case 'restore':
+                          onRestore?.call();
+                          break;
                         case 'delete':
                           onDelete?.call();
                           break;
                       }
                     },
                     itemBuilder: (_) => [
-                      const PopupMenuItem(
-                        value: 'share',
-                        child: Row(
-                          children: [
-                            Icon(Icons.share, size: 18),
-                            SizedBox(width: 12),
-                            Text('Share'),
-                          ],
+                      if (onRestore != null)
+                        PopupMenuItem(
+                          value: 'restore',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.restore_from_trash_rounded,
+                                  size: 18),
+                              const SizedBox(width: 12),
+                              Text('restore'.tr),
+                            ],
+                          ),
                         ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'rename',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, size: 18),
-                            SizedBox(width: 12),
-                            Text('Rename'),
-                          ],
+                      if (onShare != null)
+                        PopupMenuItem(
+                          value: 'share',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.share, size: 18),
+                              const SizedBox(width: 12),
+                              Text('share'.tr),
+                            ],
+                          ),
                         ),
-                      ),
-                      const PopupMenuItem(
+                      if (onRename != null)
+                        PopupMenuItem(
+                          value: 'rename',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.edit, size: 18),
+                              const SizedBox(width: 12),
+                              Text('rename'.tr),
+                            ],
+                          ),
+                        ),
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete_outline,
+                            const Icon(Icons.delete_outline,
                                 size: 18, color: Colors.red),
-                            SizedBox(width: 12),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
+                            const SizedBox(width: 12),
+                            Text('delete'.tr,
+                                style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),

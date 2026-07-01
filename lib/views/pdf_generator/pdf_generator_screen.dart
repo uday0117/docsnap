@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import '../../controllers/pdf_generator_controller.dart';
 import '../../themes/app_theme.dart';
 import '../../utils/app_constants.dart';
+import '../../utils/app_helpers.dart';
+import '../../widgets/ad_banner_widget.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/common_widgets.dart';
 
@@ -34,23 +36,30 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDocumentNameField(context),
-            const SizedBox(height: 20),
-            _buildFolderSelector(context),
-            const SizedBox(height: 20),
-            _buildQualitySelector(context),
-            const SizedBox(height: 24),
-            _buildPagesList(context),
-            const SizedBox(height: 24),
-            _buildGenerateButton(),
-            const SizedBox(height: 40),
-          ],
-        ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDocumentNameField(context),
+                  const SizedBox(height: 20),
+                  _buildFolderSelector(context),
+                  const SizedBox(height: 20),
+                  _buildQualitySelector(context),
+                  const SizedBox(height: 24),
+                  _buildPagesList(context),
+                  const SizedBox(height: 24),
+                  _buildGenerateButton(),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+          const AdBannerWidget(),
+        ],
       ),
     );
   }
@@ -68,9 +77,9 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
           () => TextFormField(
             initialValue: controller.documentName.value,
             onChanged: (v) => controller.documentName.value = v,
-            decoration: const InputDecoration(
-              hintText: 'Enter document name',
-              prefixIcon: Icon(Icons.description_rounded),
+            decoration: InputDecoration(
+              hintText: 'hint_document_name'.tr,
+              prefixIcon: const Icon(Icons.description_rounded),
             ),
           ),
         ),
@@ -79,6 +88,8 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
   }
 
   Widget _buildFolderSelector(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -91,18 +102,28 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
             children: AppConstants.defaultFolders
                 .where((f) => f != 'All Documents')
                 .map(
-                  (folder) => ChoiceChip(
-                    label: Text(folder),
-                    selected: controller.selectedFolder.value == folder,
-                    onSelected: (_) => controller.setFolder(folder),
-                    selectedColor: AppTheme.primaryColor,
-                    labelStyle: TextStyle(
-                      color: controller.selectedFolder.value == folder
-                          ? Colors.white
-                          : null,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  (folder) {
+                    final isSelected =
+                        controller.selectedFolder.value == folder;
+                    return ChoiceChip(
+                      label: Text(folder),
+                      selected: isSelected,
+                      onSelected: (_) => controller.setFolder(folder),
+                      selectedColor: AppTheme.primaryColor,
+                      backgroundColor: colorScheme.surfaceContainerHighest,
+                      side: BorderSide(
+                        color: isSelected
+                            ? AppTheme.primaryColor
+                            : colorScheme.outline.withAlpha(80),
+                      ),
+                      labelStyle: TextStyle(
+                        color: isSelected
+                            ? Colors.white
+                            : colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    );
+                  },
                 )
                 .toList(),
           ),
@@ -112,6 +133,8 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
   }
 
   Widget _buildQualitySelector(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -119,41 +142,50 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
         const SizedBox(height: 8),
         Obx(
           () => Row(
-            children: AppConstants.pdfQualities.map(
-              (quality) {
-                final isSelected = controller.pdfQuality.value == quality;
-                return Expanded(
+            children: [
+              for (var i = 0; i < AppConstants.pdfQualities.length; i++) ...[
+                if (i > 0) const SizedBox(width: 8),
+                Expanded(
                   child: GestureDetector(
-                    onTap: () => controller.setQuality(quality),
+                    onTap: () =>
+                        controller.setQuality(AppConstants.pdfQualities[i]),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                        color: isSelected
+                        color: controller.pdfQuality.value ==
+                                AppConstants.pdfQualities[i]
                             ? AppTheme.primaryColor
-                            : Theme.of(context).cardColor,
+                            : colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: isSelected
+                          color: controller.pdfQuality.value ==
+                                  AppConstants.pdfQualities[i]
                               ? AppTheme.primaryColor
-                              : Colors.grey.shade300,
+                              : colorScheme.outline.withAlpha(80),
                         ),
                       ),
                       child: Text(
-                        quality,
+                        AppHelpers.translateQuality(
+                          AppConstants.pdfQualities[i],
+                        ),
                         textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: isSelected ? Colors.white : null,
+                          color: controller.pdfQuality.value ==
+                                  AppConstants.pdfQualities[i]
+                              ? Colors.white
+                              : colorScheme.onSurface,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
                       ),
                     ),
                   ),
-                );
-              },
-            ).toList(),
+                ),
+              ],
+            ],
           ),
         ),
       ],
@@ -163,26 +195,25 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
   Widget _buildPagesList(BuildContext context) {
     return Obx(() {
       if (controller.pages.isEmpty) {
-        return const Center(
-          child: Text('No pages added.', style: TextStyle(color: Colors.grey)),
+        return Center(
+          child: Text(
+            'no_pages_added'.tr,
+            style: const TextStyle(color: Colors.grey),
+          ),
         );
       }
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                'Pages (${controller.pages.length})',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const Spacer(),
-              const Text(
-                'Long press to reorder',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
+          Text(
+            'pages_count'.trParams({'count': '${controller.pages.length}'}),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'long_press_reorder'.tr,
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
           const SizedBox(height: 12),
           ReorderableListView.builder(
@@ -217,11 +248,13 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
                     ),
                   ),
                   title: Text(
-                    'Page ${index + 1}',
+                    'page_n'.trParams({'n': '${index + 1}'}),
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'Filter: ${page.filter}',
+                    'filter_label'.trParams({
+                      'filter': AppHelpers.translateFilterName(page.filter),
+                    }),
                     style: const TextStyle(fontSize: 12),
                   ),
                   trailing: Row(
@@ -232,9 +265,9 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
                         color: Colors.grey,
                       ),
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.delete_outline_rounded,
-                          color: Colors.red,
+                          color: Theme.of(context).colorScheme.error,
                           size: 20,
                         ),
                         onPressed: () => controller.deletePage(index),
@@ -253,7 +286,7 @@ class PdfGeneratorScreen extends GetView<PdfGeneratorController> {
   Widget _buildGenerateButton() {
     return Obx(
       () => AppButton(
-        label: 'Generate & Save PDF',
+        label: 'generate_save_pdf'.tr,
         icon: Icons.picture_as_pdf_rounded,
         isLoading: controller.isGenerating.value,
         onPressed: controller.generateAndSave,

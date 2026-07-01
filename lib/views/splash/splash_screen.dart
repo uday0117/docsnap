@@ -3,46 +3,63 @@ import 'package:get/get.dart';
 
 import '../../controllers/splash_controller.dart';
 import '../../themes/app_theme.dart';
+import '../../widgets/app_logo.dart';
 
 class SplashScreen extends GetView<SplashController> {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Access controller to ensure it's instantiated
     controller;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primaryDark,
-              AppTheme.primaryColor,
-              AppTheme.primaryLight
-            ],
-            stops: [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(flex: 2),
-                _AnimatedLogo(),
-                const SizedBox(height: 28),
-                _AnimatedTitle(),
-                const SizedBox(height: 10),
-                _AnimatedSubtitle(),
-                const Spacer(flex: 2),
-                _LoadingIndicator(),
-                const SizedBox(height: 40),
-              ],
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Positioned(
+              top: -80,
+              right: -60,
+              child: Container(
+                width: 220,
+                height: 220,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.primaryColor.withAlpha(18),
+                ),
+              ),
             ),
-          ),
+            Positioned(
+              bottom: -40,
+              left: -50,
+              child: Container(
+                width: 180,
+                height: 180,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.primaryLight.withAlpha(20),
+                ),
+              ),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const _AnimatedLogo(),
+                  const SizedBox(height: 28),
+                  const _AnimatedTitle(),
+                  const SizedBox(height: 8),
+                  _AnimatedSubtitle(),
+                ],
+              ),
+            ),
+            const Positioned(
+              left: 48,
+              right: 48,
+              bottom: 48,
+              child: _LoadingBar(),
+            ),
+          ],
         ),
       ),
     );
@@ -50,6 +67,8 @@ class SplashScreen extends GetView<SplashController> {
 }
 
 class _AnimatedLogo extends StatefulWidget {
+  const _AnimatedLogo();
+
   @override
   State<_AnimatedLogo> createState() => _AnimatedLogoState();
 }
@@ -57,21 +76,24 @@ class _AnimatedLogo extends StatefulWidget {
 class _AnimatedLogoState extends State<_AnimatedLogo>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnim;
-  late Animation<double> _opacityAnim;
+  late Animation<double> _scale;
+  late Animation<double> _opacity;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 900),
       vsync: this,
     );
-    _scaleAnim = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+    _scale = Tween<double>(begin: 0.82, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
-    _opacityAnim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0, 0.6)),
+    _opacity = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0, 0.55, curve: Curves.easeOut),
+      ),
     );
     _controller.forward();
   }
@@ -87,54 +109,10 @@ class _AnimatedLogoState extends State<_AnimatedLogo>
     return AnimatedBuilder(
       animation: _controller,
       builder: (_, __) => Opacity(
-        opacity: _opacityAnim.value,
+        opacity: _opacity.value,
         child: Transform.scale(
-          scale: _scaleAnim.value,
-          child: Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(50),
-                  blurRadius: 30,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    Icons.document_scanner_rounded,
-                    size: 60,
-                    color: AppTheme.primaryColor,
-                  ),
-                  Positioned(
-                    bottom: 22,
-                    right: 22,
-                    child: Container(
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: AppTheme.accentColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                      child: const Icon(
-                        Icons.picture_as_pdf,
-                        size: 12,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          scale: _scale.value,
+          child: const AppLogo(size: 108),
         ),
       ),
     );
@@ -142,6 +120,8 @@ class _AnimatedLogoState extends State<_AnimatedLogo>
 }
 
 class _AnimatedTitle extends StatefulWidget {
+  const _AnimatedTitle();
+
   @override
   State<_AnimatedTitle> createState() => _AnimatedTitleState();
 }
@@ -149,23 +129,23 @@ class _AnimatedTitle extends StatefulWidget {
 class _AnimatedTitleState extends State<_AnimatedTitle>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<Offset> _slideAnim;
-  late Animation<double> _opacityAnim;
+  late Animation<Offset> _slide;
+  late Animation<double> _opacity;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 700),
       vsync: this,
     );
-    _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.5),
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.25),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-    _opacityAnim = Tween<double>(begin: 0, end: 1).animate(_controller);
+    _opacity = Tween<double>(begin: 0, end: 1).animate(_controller);
 
-    Future.delayed(const Duration(milliseconds: 600), () {
+    Future.delayed(const Duration(milliseconds: 350), () {
       if (mounted) _controller.forward();
     });
   }
@@ -181,23 +161,16 @@ class _AnimatedTitleState extends State<_AnimatedTitle>
     return AnimatedBuilder(
       animation: _controller,
       builder: (_, __) => Opacity(
-        opacity: _opacityAnim.value,
+        opacity: _opacity.value,
         child: SlideTransition(
-          position: _slideAnim,
+          position: _slide,
           child: const Text(
             'DocSnap',
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 42,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.5,
-              shadows: [
-                Shadow(
-                  color: Colors.black26,
-                  blurRadius: 8,
-                  offset: Offset(0, 4),
-                ),
-              ],
+              color: Color(0xFF1A1A1A),
+              fontSize: 34,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
             ),
           ),
         ),
@@ -214,7 +187,7 @@ class _AnimatedSubtitle extends StatefulWidget {
 class _AnimatedSubtitleState extends State<_AnimatedSubtitle>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _opacityAnim;
+  late Animation<double> _opacity;
 
   @override
   void initState() {
@@ -223,8 +196,8 @@ class _AnimatedSubtitleState extends State<_AnimatedSubtitle>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    _opacityAnim = Tween<double>(begin: 0, end: 1).animate(_controller);
-    Future.delayed(const Duration(milliseconds: 1000), () {
+    _opacity = Tween<double>(begin: 0, end: 1).animate(_controller);
+    Future.delayed(const Duration(milliseconds: 650), () {
       if (mounted) _controller.forward();
     });
   }
@@ -240,21 +213,15 @@ class _AnimatedSubtitleState extends State<_AnimatedSubtitle>
     return AnimatedBuilder(
       animation: _controller,
       builder: (_, __) => Opacity(
-        opacity: _opacityAnim.value,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha(40),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Text(
-            'PDF Scanner & Document Manager',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.w400,
-              letterSpacing: 0.5,
-            ),
+        opacity: _opacity.value,
+        child: Text(
+          'app_subtitle'.tr,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.2,
           ),
         ),
       ),
@@ -262,27 +229,24 @@ class _AnimatedSubtitleState extends State<_AnimatedSubtitle>
   }
 }
 
-class _LoadingIndicator extends StatefulWidget {
+class _LoadingBar extends StatefulWidget {
+  const _LoadingBar();
+
   @override
-  State<_LoadingIndicator> createState() => _LoadingIndicatorState();
+  State<_LoadingBar> createState() => _LoadingBarState();
 }
 
-class _LoadingIndicatorState extends State<_LoadingIndicator>
+class _LoadingBarState extends State<_LoadingBar>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _opacityAnim;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 1400),
       vsync: this,
-    );
-    _opacityAnim = Tween<double>(begin: 0, end: 1).animate(_controller);
-    Future.delayed(const Duration(milliseconds: 1400), () {
-      if (mounted) _controller.forward();
-    });
+    )..repeat();
   }
 
   @override
@@ -295,17 +259,30 @@ class _LoadingIndicatorState extends State<_LoadingIndicator>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (_, __) => Opacity(
-        opacity: _opacityAnim.value,
-        child: SizedBox(
-          width: 36,
-          height: 36,
-          child: CircularProgressIndicator(
-            strokeWidth: 3,
-            color: Colors.white.withAlpha(200),
-          ),
-        ),
-      ),
+      builder: (_, __) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                minHeight: 3,
+                backgroundColor: AppTheme.primaryColor.withAlpha(30),
+                valueColor: const AlwaysStoppedAnimation(AppTheme.primaryColor),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'loading'.tr,
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
